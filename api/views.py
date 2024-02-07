@@ -25,7 +25,7 @@ class ClassScheduleView(APIView):
             response = requests.get('https://openapi.data.uwaterloo.ca/v3/ClassSchedules/' + 
                                 str(term) + '/' + str(course_id),
                                  headers=headers)
-        if course_id is None:
+        else:
             subject = request.query_params.get('subject')
             catalog_number = request.query_params.get('catalog_number')
             response = requests.get('https://openapi.data.uwaterloo.ca/v3/ClassSchedules/' + 
