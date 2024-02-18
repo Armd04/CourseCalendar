@@ -6,7 +6,6 @@ from .models import Profile
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-import json
 
 
 class LoginView(APIView):
@@ -56,7 +55,7 @@ class LoggedInView(APIView):
             user = User.objects.get(username=request.user.username)
             profile = Profile.objects.get(user=user)
             courses = [course.course_id for course in profile.courses.all()]
-            return Response({'username': user.username, 'email' : user.email, 'courses' : json.dumps(courses)}, status=status.HTTP_200_OK)
+            return Response({'username': user.username, 'email' : user.email, 'courses' : courses}, status=status.HTTP_200_OK)
         return Response({'message': 'User is not logged in'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
