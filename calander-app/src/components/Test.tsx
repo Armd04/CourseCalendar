@@ -66,7 +66,7 @@ const Test: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<ApiResponse>('http://localhost:8000/api/class?term=1241&id=000004', {
+        const response = await axios.get<ApiResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class?term=1241&id=000004`, {
           headers: {
             'Accept': 'application/json',
             'Access-Control-Allow-Origin': '*', // This header is usually controlled by the server
