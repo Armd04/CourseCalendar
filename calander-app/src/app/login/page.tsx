@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import './login.css';
+import '../styles/login.css';
 import { useRouter } from 'next/navigation';
 
 const Login: React.FC = () => {
