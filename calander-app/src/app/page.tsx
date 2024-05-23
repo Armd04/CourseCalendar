@@ -1,7 +1,9 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import Test from "../components/Test";
+import Login from "./login/page";
+import LoggedIn from "./logged-in/page";
 
 export default function Home() {
   return (

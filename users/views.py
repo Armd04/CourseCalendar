@@ -6,6 +6,7 @@ from .models import Profile
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginView(APIView):
@@ -18,8 +19,9 @@ class LoginView(APIView):
             password = serializer.data.get('password')
             user = authenticate(username=username, password=password)
             if user:
+                refresh = RefreshToken.for_user(user)
                 login(request, user)
-                return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+                return Response({'refresh': str(refresh),'access': str(refresh.access_token)}, status=status.HTTP_200_OK)
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
