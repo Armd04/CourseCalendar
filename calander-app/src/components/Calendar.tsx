@@ -93,11 +93,28 @@ const timeSlots = [
   "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
 ];
 
+const events = [
+  {
+    day: "Monday",
+    time: "11:00 AM",
+    details: "Meeting with Team",
+    id: "23011-6",
+    description: "Discuss project milestones"
+  },
+  {
+    day: "Wednesday",
+    time: "10:00 AM",
+    details: "Code Review",
+    id: "23011-7",
+    description: "Review latest PRs"
+  }
+];
+
 const Calendar: React.FC = () => {
   return (
     <CalendarContainer>
       <Sidebar>
-        <h3>Total Courses: 0</h3>
+        <h3>Total Courses: {events.length}</h3>
         <Select>
           <option value="">Select Faculty...</option>
           <option value="MATH">Faculty of Math</option>
@@ -117,14 +134,20 @@ const Calendar: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {timeSlots.map((slot, index) => (
+            {timeSlots.map((timeSlot, index) => (
               <tr key={index}>
-                <TimeColumn>{slot}</TimeColumn>
-                <Td></Td>
-                <Td></Td>
-                <Td></Td>
-                <Td></Td>
-                <Td></Td>
+                <TimeColumn>{timeSlot}</TimeColumn>
+                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
+                  <Td key={day}>
+                    {events.filter(event => event.day === day && event.time === timeSlot).map(event => (
+                      <div style={{ backgroundColor: "#f9d342", padding: "5px", margin: "5px" }}>
+                        <strong>{event.id}</strong>
+                        <div>{event.details}</div>
+                        <div>{event.description}</div>
+                      </div>
+                    ))}
+                  </Td>
+                ))}
               </tr>
             ))}
           </tbody>
