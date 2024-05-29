@@ -1,10 +1,9 @@
 'use client';
 
-import { title } from 'process';
+import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
-import { start } from 'repl';
 import styled from 'styled-components';
-import { format } from 'url';
+import Select from 'react-select';
 
 const CalendarContainer = styled.div`
   display: flex;
@@ -71,17 +70,19 @@ const Input = styled.input`
   border-radius: 4px;
 `;
 
-const Select = styled.select`
-  background-color: #fff;
-  color: #000;
-  width: 100%;
-  padding: 5px;
-  margin-top: 10px;
-  border: 1px solid #333;
-  border-radius: 4px;
-
-  /* Ensure option text is visible */
-  option {
+const StyledSelect = styled(Select)`
+  .react-select__control {
+    background-color: #fff;
+    color: #000;
+    border-color: #333;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+  .react-select__menu {
+    background-color: #fff;
+    color: #000;
+  }
+  .react-select__option {
     color: #000;
   }
 `;
@@ -101,6 +102,8 @@ const Event = styled.div<EventProps>`
   overflow: hidden; /* Hide overflow content */
   white-space: nowrap; /* Ensure text doesn't wrap */
   text-overflow: ellipsis; /* Show ellipsis for overflowing text */
+  align-items: center;
+  text-align: center;
   position: absolute;
   left: 5px;
   right: 5px;
@@ -167,7 +170,9 @@ const firstIndex = (startTime: string, timeSlots: string[]) => {
 
 
 const Calendar: React.FC = () => {
-  const [slotHeight, setSlotHeight] = useState<number>(50); // Default value
+  const [slotHeight, setSlotHeight] = useState<number>(50);
+  const [subjects, setSubjects] = useState<string[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
 
   useEffect(() => {
@@ -176,11 +181,42 @@ const Calendar: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-subjects/`, {
+          headers: {
+            'Accept': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          }
+        });
+        setSubjects(response.data['subjects'].map((subject: string) => ({id: subject, label: subject, value: subject})));
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.log(error.message);
+        } else {
+          console.log('An unexpected error occurred');
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSubjectChange = (selectedOption: any) => {
+    console.log(selectedOption.value);
+    setSelectedSubject(selectedOption.value);
+  }
+
+  const handleSearch = (event: React.FormEvent<HTMLInputElement>) => {
+    console.log(event.currentTarget.value);
+  }
+
   const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {
     const start = formatTime(startTime);
     const end = formatTime(endTime);
     // console.log((start - formatTime(timeSlots[0])) * slotHeight / 1000);
-    console.log(start, end, end - start, slotHeight);
+    // console.log(start, end, end - start, slotHeight);
     return {
       top: ((formatTime(startTime) - formatTime(timeSlots[0])) - Math.floor(formatTime(startTime) - formatTime(timeSlots[0]))) * slotHeight,
       height: (end - start) * slotHeight
@@ -191,11 +227,13 @@ const Calendar: React.FC = () => {
     <CalendarContainer>
       <Sidebar>
         <h3>Total Courses: {events.length}</h3>
-        <Select>
-          <option value="">Select Faculty...</option>
-          <option value="MATH">Faculty of Math</option>
-        </Select>
-        <Input type="text" placeholder="Search..." />
+        <StyledSelect
+          options={subjects}
+          placeholder="Faculty ..."
+          classNamePrefix="react-select"
+          onChange={handleSubjectChange}
+        />
+        <Input type="text" placeholder="Search..." onChange={handleSearch}/>
       </Sidebar>
       <Content>
         <Table>
@@ -218,14 +256,10 @@ const Calendar: React.FC = () => {
                     {events.filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
                       const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                       return (
-                        // <EventWrapper key={event.id} top={top} height={height}>
-                          <Event key={event.id} top={top} height={height}>
-                            <strong>{event.title} - {event.id}</strong>
-                            {/* <div>{event.details}</div>
-                            <div>{event.description}</div> */}
-                            <div>{event.startTime} to {event.endTime}</div>
-                          </Event>
-                        // </EventWrapper>
+                        <Event key={event.id} top={top} height={height}>
+                          <strong>{event.title} - {event.id}</strong>
+                          <div>{event.startTime} to {event.endTime}</div>
+                        </Event>
                       );
                     })}
                   </Td>

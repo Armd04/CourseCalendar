@@ -83,15 +83,28 @@ class GetCoursesView(LoginRequiredMixin, APIView):
 
 class GetScheduleView(LoginRequiredMixin, APIView):
     def get(self, request, format=None):
+        term = request.query_params.get('term')
         user = request.user
         profile = user.profile
         courses = [course.course_id for course in profile.courses.all()]
         schedule = []
         for course in courses:
-            response = requests.get('http://localhost:8000/api/class?term=1241&id=' + str(course))
+            response = requests.get('http://localhost:8000/api/class?term=' + str(term) + '&id=' + str(course))
             schedule.append(response.json())
         
         return Response(schedule, status=status.HTTP_200_OK)
+    
+
+
+class GetSubjectsView(APIView):
+    def get(self, request, format=None):
+        headers = {'x-api-key': settings.API_KEY}
+        response = requests.get('https://openapi.data.uwaterloo.ca/v3/Subjects', headers=headers)
+        if response.status_code == 200:
+            codes = [subject['code'] for subject in response.json()]
+            return Response({'subjects': codes}, status=status.HTTP_200_OK)
+        else:
+            return Response(response.text, status=response.status_code)
         
 
 
