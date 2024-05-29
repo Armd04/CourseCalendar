@@ -1,6 +1,10 @@
 'use client';
 
+import { title } from 'process';
+import React, { useState, useEffect, useRef } from 'react';
+import { start } from 'repl';
 import styled from 'styled-components';
+import { format } from 'url';
 
 const CalendarContainer = styled.div`
   display: flex;
@@ -25,6 +29,7 @@ const Content = styled.div`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  position: relative;
 `;
 
 const Th = styled.th`
@@ -33,6 +38,7 @@ const Th = styled.th`
   background-color: #444;
   width: 20%;
 `;
+
 const TimeTh = styled.th`
   border: 1px solid #333;
   padding: 10px;
@@ -43,6 +49,7 @@ const TimeTh = styled.th`
 const Td = styled.td`
   border: 1px solid #333;
   height: 50px;
+  position: relative;
 `;
 
 const TimeColumn = styled.td`
@@ -64,7 +71,6 @@ const Input = styled.input`
   border-radius: 4px;
 `;
 
-
 const Select = styled.select`
   background-color: #fff;
   color: #000;
@@ -80,12 +86,27 @@ const Select = styled.select`
   }
 `;
 
-const Option = styled.option`
-    background-color: black;
-    color: #000;
-    text-color: #000;
-`;
+interface EventProps {
+  top: number;
+  height: number;
+}
 
+
+const Event = styled.div<EventProps>`
+  background-color: #f9d342;
+  padding: 5px;
+  margin: 0;
+  border-radius: 4px;
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  overflow: hidden; /* Hide overflow content */
+  white-space: nowrap; /* Ensure text doesn't wrap */
+  text-overflow: ellipsis; /* Show ellipsis for overflowing text */
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: ${(props) => props.top}px;
+  height: ${(props) => props.height}px;
+`;
 
 const timeSlots = [
   "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
@@ -96,21 +117,76 @@ const timeSlots = [
 const events = [
   {
     day: "Monday",
-    time: "11:00 AM",
-    details: "Meeting with Team",
+    startTime: "10:00 AM",
+    endTime: "11:20 AM",
     id: "23011-6",
-    description: "Discuss project milestones"
+    title: "MATH 101",
   },
   {
     day: "Wednesday",
-    time: "10:00 AM",
-    details: "Code Review",
+    startTime: "10:00 AM",
+    endTime: "11:00 AM",
     id: "23011-7",
-    description: "Review latest PRs"
+    title: "MATH 101",
+  },
+  {
+    day: "Friday",
+    startTime: "7:00 AM",
+    endTime: "10:50 AM",
+    id: "23011-8",
+    title: "CS 101",
+  },
+  {
+    day: "Thursday",
+    startTime: "2:00 PM",
+    endTime: "4:20 PM",
+    id: "23011-9",
+    title: "CS 101",
+  },
+  {
+    day: "Monday",
+    startTime: "11:30 AM",
+    endTime: "1:00 PM",
+    id: "23011-10",
+    title: "CS 101",
   }
 ];
 
+const formatTime = (time: string): number => {
+  const [hour, minutePart] = time.split(':');
+  const minutes = parseInt(minutePart.substring(0, 2));
+  const period = minutePart.substring(2).trim().toUpperCase();
+  const hour24 = period === 'PM' && hour !== '12' ? parseInt(hour) + 12 : parseInt(hour);
+  return hour24 + minutes / 60;
+};
+
+const firstIndex = (startTime: string, timeSlots: string[]) => {
+  // return timeSlots.findIndex(time => formatTime(time) >= formatTime(startTime));
+  return Math.floor(formatTime(startTime) - formatTime(timeSlots[0]));
+}
+
+
 const Calendar: React.FC = () => {
+  const [slotHeight, setSlotHeight] = useState<number>(50); // Default value
+  const timeSlotRef = useRef<HTMLTableCellElement>(null);
+
+  useEffect(() => {
+    if (timeSlotRef.current) {
+      setSlotHeight(timeSlotRef.current.clientHeight);
+    }
+  }, []);
+
+  const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {
+    const start = formatTime(startTime);
+    const end = formatTime(endTime);
+    // console.log((start - formatTime(timeSlots[0])) * slotHeight / 1000);
+    console.log(start, end, end - start, slotHeight);
+    return {
+      top: ((formatTime(startTime) - formatTime(timeSlots[0])) - Math.floor(formatTime(startTime) - formatTime(timeSlots[0]))) * slotHeight,
+      height: (end - start) * slotHeight
+    };
+  };
+
   return (
     <CalendarContainer>
       <Sidebar>
@@ -136,16 +212,22 @@ const Calendar: React.FC = () => {
           <tbody>
             {timeSlots.map((timeSlot, index) => (
               <tr key={index}>
-                <TimeColumn>{timeSlot}</TimeColumn>
+                <TimeColumn ref={index === 0 ? timeSlotRef : null}>{timeSlot}</TimeColumn>
                 {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
                   <Td key={day}>
-                    {events.filter(event => event.day === day && event.time === timeSlot).map(event => (
-                      <div style={{ backgroundColor: "#f9d342", padding: "5px", margin: "5px" }}>
-                        <strong>{event.id}</strong>
-                        <div>{event.details}</div>
-                        <div>{event.description}</div>
-                      </div>
-                    ))}
+                    {events.filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
+                      const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
+                      return (
+                        // <EventWrapper key={event.id} top={top} height={height}>
+                          <Event key={event.id} top={top} height={height}>
+                            <strong>{event.title} - {event.id}</strong>
+                            {/* <div>{event.details}</div>
+                            <div>{event.description}</div> */}
+                            <div>{event.startTime} to {event.endTime}</div>
+                          </Event>
+                        // </EventWrapper>
+                      );
+                    })}
                   </Td>
                 ))}
               </tr>
