@@ -17,6 +17,9 @@ const Sidebar = styled.div`
   background-color: #1a1a1a;
   padding: 20px;
   text-align: center;
+  display: flex; // Changed to flex to manage children flexibly
+  flex-direction: column; // Children are stacked vertically
+  height: 100%; // Fill the parent height
 `;
 
 const Content = styled.div`
@@ -111,6 +114,25 @@ const Event = styled.div<EventProps>`
   height: ${(props) => props.height}px;
 `;
 
+const CourseSectionsContainer = styled.div`
+  background-color: #282828;
+  color: #fff;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-grow: 1; // Takes up all available space
+  overflow-y: auto; // Enable vertical scrolling
+`;
+
+const CourseSectionItem = styled.div`
+  background-color: #333;
+  padding: 5px;
+  border-radius: 4px;
+`;
+
 const timeSlots = [
   "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
   "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
@@ -124,34 +146,6 @@ const events = [
     endTime: "11:20 AM",
     id: "23011-6",
     title: "MATH 101",
-  },
-  {
-    day: "Wednesday",
-    startTime: "10:00 AM",
-    endTime: "11:00 AM",
-    id: "23011-7",
-    title: "MATH 101",
-  },
-  {
-    day: "Friday",
-    startTime: "7:00 AM",
-    endTime: "10:50 AM",
-    id: "23011-8",
-    title: "CS 101",
-  },
-  {
-    day: "Thursday",
-    startTime: "2:00 PM",
-    endTime: "4:20 PM",
-    id: "23011-9",
-    title: "CS 101",
-  },
-  {
-    day: "Monday",
-    startTime: "11:30 AM",
-    endTime: "1:00 PM",
-    id: "23011-10",
-    title: "CS 101",
   }
 ];
 
@@ -173,6 +167,8 @@ const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
   const [subjects, setSubjects] = useState<string[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [courseCode, setCourseCode] = useState<string>('');
+  const [courseSections, setCourseSections] = useState<any[]>([]);
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
 
   useEffect(() => {
@@ -204,13 +200,28 @@ const Calendar: React.FC = () => {
   }, []);
 
   const handleSubjectChange = (selectedOption: any) => {
-    console.log(selectedOption.value);
     setSelectedSubject(selectedOption.value);
-  }
+  };
 
-  const handleSearch = (event: React.FormEvent<HTMLInputElement>) => {
-    console.log(event.currentTarget.value);
-  }
+  const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputCode = event.target.value;
+    setCourseCode(inputCode);
+    if (selectedSubject && inputCode) {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=1245&subject=${selectedSubject}&catalog_number=${inputCode}`);
+        if (response.data.length > 0) {
+          setCourseSections(response.data);
+        } else {
+          setCourseSections([]); // Clear course sections if no data is returned
+        }
+      } catch (error) {
+        console.error('Failed to fetch course sections:', error);
+        setCourseSections([]); // Clear course sections if there's an error
+      }
+    } else {
+      setCourseSections([]); // Clear course sections if subject or course code is not provided
+    }
+  };
 
   const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {
     const start = formatTime(startTime);
@@ -234,6 +245,13 @@ const Calendar: React.FC = () => {
           onChange={handleSubjectChange}
         />
         <Input type="text" placeholder="Search..." onChange={handleSearch}/>
+        <CourseSectionsContainer>
+          {courseSections.map((section) => (
+            <CourseSectionItem key={section.classNumber}>
+              {selectedSubject.toUpperCase()} {courseCode} {section.classNumber}
+            </CourseSectionItem>
+          ))}
+        </CourseSectionsContainer>
       </Sidebar>
       <Content>
         <Table>
