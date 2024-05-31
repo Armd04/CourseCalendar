@@ -131,22 +131,16 @@ const CourseSectionItem = styled.div`
   background-color: #333;
   padding: 5px;
   border-radius: 4px;
+  cursor: pointer; // Add cursor pointer to indicate clickable
+  &:hover {
+    background-color: #444;
+  }
 `;
 
 const timeSlots = [
   "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
   "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
   "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
-];
-
-const events = [
-  {
-    day: "Monday",
-    startTime: "10:00 AM",
-    endTime: "11:20 AM",
-    id: "23011-6",
-    title: "MATH 101",
-  }
 ];
 
 const formatTime = (time: string): number => {
@@ -170,6 +164,7 @@ const Calendar: React.FC = () => {
   const [courseCode, setCourseCode] = useState<string>('');
   const [courseSections, setCourseSections] = useState<any[]>([]);
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     if (timeSlotRef.current) {
@@ -234,6 +229,29 @@ const Calendar: React.FC = () => {
     };
   };
 
+  const handleCourseSectionClick = (course: any) => {
+    const newEvents = course.scheduleData.map((schedule: any) => {
+      const days = schedule.classMeetingDayPatternCode.split('');
+      return days.map((day: string) => {
+        if (day === 'N') return null;
+        const startTime = new Date(schedule.classMeetingStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const endTime = new Date(schedule.classMeetingEndTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        return {
+          day: day === 'M' ? 'Monday' :
+               day === 'T' ? 'Tuesday' :
+               day === 'W' ? 'Wednesday' :
+               day === 'R' ? 'Thursday' :
+               day === 'F' ? 'Friday' : '',
+          startTime: startTime,
+          endTime: endTime,
+          id: course.classNumber,
+          title: `${selectedSubject.toUpperCase()} ${courseCode}`
+        };
+      }).filter((event: any) => event !== null);
+    }).flat();
+    setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+  };
+
   return (
     <CalendarContainer>
       <Sidebar>
@@ -247,11 +265,11 @@ const Calendar: React.FC = () => {
         <Input type="text" placeholder="Search..." onChange={handleSearch}/>
         <CourseSectionsContainer>
           {courseSections.map((section) => (
-            <CourseSectionItem key={section.classNumber}>
+            <CourseSectionItem key={section.classNumber} onClick={() => handleCourseSectionClick(section)}>
               {selectedSubject.toUpperCase()} {courseCode} {section.classNumber}
             </CourseSectionItem>
           ))}
-        </CourseSectionsContainer>
+      </CourseSectionsContainer>
       </Sidebar>
       <Content>
         <Table>
