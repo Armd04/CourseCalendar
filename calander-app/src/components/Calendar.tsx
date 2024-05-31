@@ -1,7 +1,8 @@
 import axios from 'axios';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
+import { useRouter } from 'next/navigation';
 
 const CalendarContainer = styled.div`
   display: flex;
@@ -161,10 +162,19 @@ const Calendar: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [hoveredEvents, setHoveredEvents] = useState<any[]>([]);
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (timeSlotRef.current) {
       setSlotHeight(timeSlotRef.current.clientHeight);
+    }
+  }, []);
+
+  useEffect(() => {
+    const user = localStorage.getItem('accessToken');
+    console.log(user);
+    if (!user) {
+      router.push('/login');
     }
   }, []);
 
@@ -276,7 +286,6 @@ const Calendar: React.FC = () => {
   return (
     <CalendarContainer>
       <Sidebar>
-        <h3>Total Courses: {events.length}</h3>
         <StyledSelect
           options={subjects}
           placeholder="Faculty ..."

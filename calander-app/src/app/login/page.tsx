@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../styles/login.css';
 import { useRouter } from 'next/navigation';
+import styles from '../styles/LoginForm.module.css';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -27,36 +27,40 @@ const Login: React.FC = () => {
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
       setMessage('Login successful.');
-      router.push('/logged-in');
+      router.push('/');
     } catch (error) {
       setMessage('Login failed. Please try again.');
     }
   };
 
   return (
-    <div className="container">
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username: </label>
+    <body className={styles.body}>
+      <div className={styles.loginContainer}>
+        <h1 className={styles.heading}>Login</h1>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <label className={styles.label} htmlFor="username">Username</label>
           <input
             type="text"
+            id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            className={styles.inputText}
+            placeholder="Username"
           />
-        </div>
-        <div>
-          <label>Password: </label>
+          <label className={styles.label} htmlFor="password">Password</label>
           <input
             type="password"
+            id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className={styles.inputPassword}
+            placeholder="Password"
           />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+          <button type="submit" className={styles.button}>Login</button>
+        </form>
+        {message && <p className={styles.message}>{message}</p>}
+      </div>
+    </body>
   );
 };
 
