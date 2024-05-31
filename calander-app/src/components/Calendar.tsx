@@ -1,5 +1,3 @@
-'use client';
-
 import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
@@ -95,7 +93,6 @@ interface EventProps {
   height: number;
 }
 
-
 const Event = styled.div<EventProps>`
   background-color: #f9d342;
   padding: 5px;
@@ -152,10 +149,8 @@ const formatTime = (time: string): number => {
 };
 
 const firstIndex = (startTime: string, timeSlots: string[]) => {
-  // return timeSlots.findIndex(time => formatTime(time) >= formatTime(startTime));
   return Math.floor(formatTime(startTime) - formatTime(timeSlots[0]));
 }
-
 
 const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
@@ -163,8 +158,9 @@ const Calendar: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [courseCode, setCourseCode] = useState<string>('');
   const [courseSections, setCourseSections] = useState<any[]>([]);
-  const timeSlotRef = useRef<HTMLTableCellElement>(null);
   const [events, setEvents] = useState<any[]>([]);
+  const [hoveredEvents, setHoveredEvents] = useState<any[]>([]);
+  const timeSlotRef = useRef<HTMLTableCellElement>(null);
 
   useEffect(() => {
     if (timeSlotRef.current) {
@@ -218,17 +214,6 @@ const Calendar: React.FC = () => {
     }
   };
 
-  const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {
-    const start = formatTime(startTime);
-    const end = formatTime(endTime);
-    // console.log((start - formatTime(timeSlots[0])) * slotHeight / 1000);
-    // console.log(start, end, end - start, slotHeight);
-    return {
-      top: ((formatTime(startTime) - formatTime(timeSlots[0])) - Math.floor(formatTime(startTime) - formatTime(timeSlots[0]))) * slotHeight,
-      height: (end - start) * slotHeight
-    };
-  };
-
   const handleCourseSectionClick = (course: any) => {
     const newEvents = course.scheduleData.map((schedule: any) => {
       const days = schedule.classMeetingDayPatternCode.split('');
@@ -252,6 +237,42 @@ const Calendar: React.FC = () => {
     setEvents((prevEvents) => [...prevEvents, ...newEvents]);
   };
 
+  const handleCourseSectionHover = (course: any) => {
+    const newEvents = course.scheduleData.map((schedule: any) => {
+      const days = schedule.classMeetingDayPatternCode.split('');
+      return days.map((day: string) => {
+        if (day === 'N') return null;
+        const startTime = new Date(schedule.classMeetingStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const endTime = new Date(schedule.classMeetingEndTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        return {
+          day: day === 'M' ? 'Monday' :
+               day === 'T' ? 'Tuesday' :
+               day === 'W' ? 'Wednesday' :
+               day === 'R' ? 'Thursday' :
+               day === 'F' ? 'Friday' : '',
+          startTime: startTime,
+          endTime: endTime,
+          id: course.classNumber,
+          title: `${selectedSubject.toUpperCase()} ${courseCode}`
+        };
+      }).filter((event: any) => event !== null);
+    }).flat();
+    setHoveredEvents(newEvents);
+  };
+
+  const handleCourseSectionLeave = () => {
+    setHoveredEvents([]);
+  };
+
+  const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {
+    const start = formatTime(startTime);
+    const end = formatTime(endTime);
+    return {
+      top: ((formatTime(startTime) - formatTime(timeSlots[0])) - Math.floor(formatTime(startTime) - formatTime(timeSlots[0]))) * slotHeight,
+      height: (end - start) * slotHeight
+    };
+  };
+
   return (
     <CalendarContainer>
       <Sidebar>
@@ -265,11 +286,16 @@ const Calendar: React.FC = () => {
         <Input type="text" placeholder="Search..." onChange={handleSearch}/>
         <CourseSectionsContainer>
           {courseSections.map((section) => (
-            <CourseSectionItem key={section.classNumber} onClick={() => handleCourseSectionClick(section)}>
+            <CourseSectionItem
+              key={section.classNumber}
+              onClick={() => handleCourseSectionClick(section)}
+              onMouseEnter={() => handleCourseSectionHover(section)}
+              onMouseLeave={handleCourseSectionLeave}
+            >
               {selectedSubject.toUpperCase()} {courseCode} {section.classNumber}
             </CourseSectionItem>
           ))}
-      </CourseSectionsContainer>
+        </CourseSectionsContainer>
       </Sidebar>
       <Content>
         <Table>
@@ -289,7 +315,7 @@ const Calendar: React.FC = () => {
                 <TimeColumn ref={index === 0 ? timeSlotRef : null}>{timeSlot}</TimeColumn>
                 {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
                   <Td key={day}>
-                    {events.filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
+                    {[...events, ...hoveredEvents].filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
                       const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                       return (
                         <Event key={event.id} top={top} height={height}>
