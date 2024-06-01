@@ -211,7 +211,9 @@ const Calendar: React.FC = () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=1245&subject=${selectedSubject}&catalog_number=${inputCode}`);
         if (response.data.length > 0) {
-          setCourseSections(response.data);
+          const lectures = response.data.filter((course: any) => course.courseComponent === 'LEC');
+          const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT');
+          setCourseSections(lectures);
         } else {
           setCourseSections([]); // Clear course sections if no data is returned
         }
