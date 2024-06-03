@@ -158,7 +158,8 @@ const Calendar: React.FC = () => {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [courseCode, setCourseCode] = useState<string>('');
-  const [courseSections, setCourseSections] = useState<any[]>([]);
+  const [lectureSections, setLectureSections] = useState<any[]>([]);
+  const [tutorialSections, setToturialSections] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [hoveredEvents, setHoveredEvents] = useState<any[]>([]);
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
@@ -213,16 +214,21 @@ const Calendar: React.FC = () => {
         if (response.data.length > 0) {
           const lectures = response.data.filter((course: any) => course.courseComponent === 'LEC');
           const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT');
-          setCourseSections(lectures);
+          setLectureSections(lectures);
+          setToturialSections(tutorials);
         } else {
-          setCourseSections([]); // Clear course sections if no data is returned
+          setLectureSections([]); // Clear course sections if no data is returned
+          setToturialSections([]); // Clear course sections if no data is returned
         }
       } catch (error) {
         console.error('Failed to fetch course sections:', error);
-        setCourseSections([]); // Clear course sections if there's an error
+        setLectureSections([]); // Clear course sections if there's an error
+        setToturialSections([]); // Clear course sections if there's an error
       }
     } else {
-      setCourseSections([]); // Clear course sections if subject or course code is not provided
+      setLectureSections([]); // Clear course sections if subject or course code is not provided
+      setToturialSections([]); // Clear course sections if subject or course code is not provided
+      
     }
   };
 
@@ -242,6 +248,8 @@ const Calendar: React.FC = () => {
           startTime: startTime,
           endTime: endTime,
           id: course.classNumber,
+          courseComponent: course.courseComponent,
+          classSection: course.classSection,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`
         };
       }).filter((event: any) => event !== null);
@@ -265,6 +273,8 @@ const Calendar: React.FC = () => {
           startTime: startTime,
           endTime: endTime,
           id: course.classNumber,
+          courseComponent: course.courseComponent,
+          classSection: course.classSection,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`
         };
       }).filter((event: any) => event !== null);
@@ -296,14 +306,26 @@ const Calendar: React.FC = () => {
         />
         <Input type="text" placeholder="Search..." onChange={handleSearch}/>
         <CourseSectionsContainer>
-          {courseSections.map((section) => (
+          {lectureSections.map((section) => (
             <CourseSectionItem
               key={section.classNumber}
               onClick={() => handleCourseSectionClick(section)}
               onMouseEnter={() => handleCourseSectionHover(section)}
               onMouseLeave={handleCourseSectionLeave}
             >
-              {selectedSubject.toUpperCase()} {courseCode} {section.classNumber}
+              {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
+            </CourseSectionItem>
+          ))}
+        </CourseSectionsContainer>
+        <CourseSectionsContainer>
+          {tutorialSections.map((section) => (
+            <CourseSectionItem
+              key={section.classNumber}
+              onClick={() => handleCourseSectionClick(section)}
+              onMouseEnter={() => handleCourseSectionHover(section)}
+              onMouseLeave={handleCourseSectionLeave}
+            >
+              {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
             </CourseSectionItem>
           ))}
         </CourseSectionsContainer>
@@ -330,7 +352,7 @@ const Calendar: React.FC = () => {
                       const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                       return (
                         <Event key={event.id} top={top} height={height}>
-                          <strong>{event.title} - {event.id}</strong>
+                          <strong>{event.title} - {event.courseComponent} {event.classSection}</strong>
                           <div>{event.startTime} to {event.endTime}</div>
                         </Event>
                       );
