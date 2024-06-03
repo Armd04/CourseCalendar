@@ -1,6 +1,6 @@
 # CourseCalander
 
-python3 manage.py
+python3 manage.py runserver
 
 cd ./calander-app
 
