@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';  // Import Link from 'next/link'
 import styles from '../styles/LoginForm.module.css';
 
 const Login: React.FC = () => {
@@ -34,18 +35,18 @@ const Login: React.FC = () => {
   };
 
   return (
-    <body className={styles.body}>
+    <div className={styles.body}>
       <div className={styles.loginContainer}>
-        <h1 className={styles.heading}>Login</h1>
+        <h1 className={styles.heading}>Log in</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <label className={styles.label} htmlFor="username">Username</label>
+          <label className={styles.label} htmlFor="username">Email</label>
           <input
             type="text"
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className={styles.inputText}
-            placeholder="Username"
+            placeholder="Email"
           />
           <label className={styles.label} htmlFor="password">Password</label>
           <input
@@ -59,8 +60,11 @@ const Login: React.FC = () => {
           <button type="submit" className={styles.button}>Login</button>
         </form>
         {message && <p className={styles.message}>{message}</p>}
+        <p className={styles.registerLink}>
+          Don't have an account? <Link href="/register">Register</Link>
+        </p>
       </div>
-    </body>
+    </div>
   );
 };
 

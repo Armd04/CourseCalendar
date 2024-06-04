@@ -1,41 +1,66 @@
+.body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
 
 .form {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   max-width: 400px;
-  margin: auto;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  width: 100%;
+  text-align: center;
 }
 
 .formGroup {
   margin-bottom: 1rem;
+  text-align: left;
 }
 
-.formGroup label {
-  color: #333;
+.formLabel {
   display: block;
+  font-size: 1rem;
+  color: #333;
   margin-bottom: 0.5rem;
 }
 
-.formGroup input {
-  color: #333;
-  width: 100%;
-  padding: 0.5rem;
+.formInput {
+  width: calc(100% - 2rem);
+  padding: 0.75rem;
   border: 1px solid #ccc;
-  border-radius: 3px;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formInput:focus {
+  border-color: #2575fc;
+  outline: none;
 }
 
 .submitButton {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #0070f3;
-  color: white;
+  padding: 0.75rem;
+  background: #2575fc;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
 }
 
 .submitButton:hover {
-  background-color: #005bb5;
+  background: #1e5db9;
+}
+
+.message {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #ff4d4d;
 }
