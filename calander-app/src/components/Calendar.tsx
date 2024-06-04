@@ -1,153 +1,8 @@
 import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
-import styled from 'styled-components';
 import Select from 'react-select';
 import { useRouter } from 'next/navigation';
-
-const CalendarContainer = styled.div`
-  display: flex;
-  height: 100vh;
-  background-color: #fff;
-  color: #000;
-`;
-
-const Sidebar = styled.div`
-  width: 200px;
-  background-color: #f0f0f0;
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
-
-const Content = styled.div`
-  flex: 1;
-  padding: 20px;
-  overflow-x: scroll;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  position: relative;
-`;
-
-const Th = styled.th`
-  border: 1px solid #ccc;
-  padding: 10px;
-  background-color: #e0e0e0;
-  width: 20%;
-`;
-
-const TimeTh = styled.th`
-  border: 1px solid #ccc;
-  padding: 10px;
-  background-color: #e0e0e0;
-  width: 15px;
-`;
-
-const Td = styled.td`
-  border: 1px solid #ccc;
-  height: 50px;
-  position: relative;
-`;
-
-const TimeColumn = styled.td`
-  border: 1px solid #ccc;
-  padding: 10px;
-  background-color: #ffffcc;
-  color: #000;
-  width: 15px;
-  text-align: center;
-`;
-
-const Input = styled.input`
-  background-color: #fff;
-  color: #000;
-  width: 100%;
-  padding: 5px;
-  margin-top: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-`;
-
-const StyledSelect = styled(Select)`
-  .react-select__control {
-    background-color: #fff;
-    color: #000;
-    border-color: #ccc;
-    border-radius: 4px;
-    margin-top: 10px;
-  }
-  .react-select__menu {
-    background-color: #fff;
-    color: #000;
-  }
-  .react-select__option {
-    color: #000;
-  }
-`;
-
-interface EventProps {
-  top: number;
-  height: number;
-  backgroundColor: string;
-}
-
-const Event = styled.div<EventProps>`
-  background-color: ${(props) => props.backgroundColor};
-  padding: 5px;
-  margin: 0;
-  border-radius: 4px;
-  box-sizing: border-box;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  align-items: center;
-  text-align: center;
-  position: absolute;
-  left: 5px;
-  right: 5px;
-  top: ${(props) => props.top}px;
-  height: ${(props) => props.height}px;
-  border: 2px solid #555;
-`;
-
-const RemoveButton = styled.button`
-  background-color: transparent;
-  border: none;
-  color: #ff4d4d;
-  font-size: 12px;
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  cursor: pointer;
-  z-index: 10;
-`;
-
-const CourseSectionsContainer = styled.div`
-  background-color: #f0f0f0;
-  color: #000;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex-grow: 1;
-  overflow-y: auto;
-`;
-
-const CourseSectionItem = styled.div`
-  background-color: #ddd;
-  padding: 5px;
-  border-radius: 4px;
-  cursor: pointer;
-  &:hover {
-    background-color: #ccc;
-  }
-`;
+import styles from './styles/Calendar.module.css';
 
 const timeSlots = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -222,6 +77,9 @@ const Calendar: React.FC = () => {
 
   const handleSubjectChange = (selectedOption: any) => {
     setSelectedSubject(selectedOption.value);
+    setCourseCode('');
+    setLectureSections([]);
+    setTutorialSections([]);
   };
 
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,76 +185,84 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <CalendarContainer>
-      <Sidebar>
-        <StyledSelect
+    <div className={styles['calendar-container']}>
+      <div className={styles.sidebar}>
+        <Select
           options={subjects}
           placeholder="Faculty ..."
           classNamePrefix="react-select"
           onChange={handleSubjectChange}
         />
-        <Input type="text" placeholder="Search..." onChange={handleSearch} />
-        <CourseSectionsContainer>
+        <input
+          type="text"
+          value={courseCode}
+          placeholder="Search..."
+          onChange={handleSearch}
+          className={styles.input}
+        />
+        <div className={styles['course-sections-container']}>
           {lectureSections.map((section) => (
-            <CourseSectionItem
+            <div
               key={section.classNumber}
               onClick={() => handleCourseSectionClick(section)}
               onMouseEnter={() => handleCourseSectionHover(section)}
               onMouseLeave={handleCourseSectionLeave}
+              className={styles['course-section-item']}
             >
               {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
-            </CourseSectionItem>
+            </div>
           ))}
-        </CourseSectionsContainer>
-        <CourseSectionsContainer>
+        </div>
+        <div className={styles['course-sections-container']}>
           {tutorialSections.map((section) => (
-            <CourseSectionItem
+            <div
               key={section.classNumber}
               onClick={() => handleCourseSectionClick(section)}
               onMouseEnter={() => handleCourseSectionHover(section)}
               onMouseLeave={handleCourseSectionLeave}
+              className={styles['course-section-item']}
             >
               {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
-            </CourseSectionItem>
+            </div>
           ))}
-        </CourseSectionsContainer>
-      </Sidebar>
-      <Content>
-        <Table>
+        </div>
+      </div>
+      <div className={styles.content}>
+        <table className={styles.table}>
           <thead>
             <tr>
-              <TimeTh>Time</TimeTh>
-              <Th>Monday</Th>
-              <Th>Tuesday</Th>
-              <Th>Wednesday</Th>
-              <Th>Thursday</Th>
-              <Th>Friday</Th>
+              <th className={styles['time-th']}>Time</th>
+              <th className={styles.th}>Monday</th>
+              <th className={styles.th}>Tuesday</th>
+              <th className={styles.th}>Wednesday</th>
+              <th className={styles.th}>Thursday</th>
+              <th className={styles.th}>Friday</th>
             </tr>
           </thead>
           <tbody>
             {timeSlots.map((timeSlot, index) => (
               <tr key={index}>
-                <TimeColumn ref={index === 0 ? timeSlotRef : null}>{timeSlot}</TimeColumn>
+                <td ref={index === 0 ? timeSlotRef : null} className={styles['time-column']}>{timeSlot}</td>
                 {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
-                  <Td key={day}>
+                  <td key={day} className={styles.td}>
                     {[...events, ...hoveredEvents].filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
                       const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                       return (
-                        <Event key={event.id} top={top} height={height} backgroundColor={event.color}>
-                          <RemoveButton onClick={() => handleRemoveEvent(event.id)}>x</RemoveButton>
-                          <strong>{event.title} - {event.courseComponent} {event.classSection}</strong><br/>
+                        <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color }}>
+                          <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
+                          <strong>{event.title} - {event.courseComponent} {event.classSection}</strong><br />
                           {event.startTime} to {event.endTime}
-                        </Event>
+                        </div>
                       );
                     })}
-                  </Td>
+                  </td>
                 ))}
               </tr>
             ))}
           </tbody>
-        </Table>
-      </Content>
-    </CalendarContainer>
+        </table>
+      </div>
+    </div>
   );
 };
 
