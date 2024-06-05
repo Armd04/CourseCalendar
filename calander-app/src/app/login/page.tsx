@@ -3,14 +3,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';  // Import Link from 'next/link'
+import Link from 'next/link';
+import Image from 'next/image';
 import styles from '../styles/LoginForm.module.css';
+import WaterlooLogo from '../styles/WaterlooFullLogo.png'; // Adjust the import path as needed
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const [user, setUser] = useState<string>('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,6 +38,9 @@ const Login: React.FC = () => {
   return (
     <div className={styles.body}>
       <div className={styles.loginContainer}>
+        <div className={styles.logoContainer}>
+          <Image src={WaterlooLogo} alt="Waterloo Logo" layout="intrinsic" width={150} height={150} />
+        </div>
         <h1 className={styles.heading}>Log in</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
           <label className={styles.label} htmlFor="username">Email</label>

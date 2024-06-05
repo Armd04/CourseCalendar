@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/navigation';
 import styles from './styles/Calendar.module.css';
+import Image from 'next/image'; // If you're using Next.js
+import WaterlooLogo from './styles/WaterlooLogoLight.png'; // Adjust the import path as needed
 
 const timeSlots = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -10,8 +12,8 @@ const timeSlots = [
 ];
 
 const colors = [
-  "#FFCCCC", "#CCCCFF", "#CCFFCC", "#FFDDCC", "#FFCCDD",
-  "#DDFFCC", "#CCCCDD", "#CCDDFF", "#FFCCBB", "#BBFFCC"
+  "#F2EDA8", "#FAE100", "#FED34C", "#EAAB00", "#FFBF00", "#FFAC1C",
+  "#F28C28", "#FF7F50", "#FAD5A5", "#F4BB44"
 ];
 
 const formatTime = (time: string): number => {
@@ -187,16 +189,19 @@ const Calendar: React.FC = () => {
   return (
     <div className={styles['calendar-container']}>
       <div className={styles.sidebar}>
+        <div className={styles.logoContainer}>
+          <Image src={WaterlooLogo} alt="Waterloo Logo" width={100} height={100} />
+        </div>
         <Select
           options={subjects}
-          placeholder="Faculty ..."
+          placeholder="Subject..."
           classNamePrefix="react-select"
           onChange={handleSubjectChange}
         />
         <input
           type="text"
           value={courseCode}
-          placeholder="Search..."
+          placeholder="Code..."
           onChange={handleSearch}
           className={styles.input}
         />
