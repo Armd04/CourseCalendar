@@ -29,6 +29,7 @@ const firstIndex = (startTime: string, timeSlots: string[]) => {
   return Math.floor(formatTime(startTime) - formatTime(timeSlots[0]));
 }
 
+
 const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -195,7 +196,27 @@ const Calendar: React.FC = () => {
         };
       }).filter((event: any) => event !== null);
     }).flat();
-    setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+
+    const checkConflict = () => {
+      for (const newEvent of newEvents) {
+        const sameDayEvents = events.filter(event => event.day === newEvent.day);
+        for (const event of sameDayEvents) {
+          if (formatTime(newEvent.startTime) < formatTime(event.endTime) && formatTime(newEvent.endTime) > formatTime(event.startTime)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    const checkRepeat = () => {
+      for (const event of events) {
+        if (event.id === course.classNumber) {
+          return false;
+        }
+      }
+      return true;
+    }
 
     const postData = async () => {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/add-course/`, {
@@ -211,7 +232,18 @@ const Calendar: React.FC = () => {
       });
     }
 
-    postData();
+    const checkConflictResult = checkConflict();
+    const checkRepeatResult = checkRepeat();
+
+    if (!checkRepeatResult) {
+      return;
+    }
+
+
+    if (checkConflictResult) {
+      setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+      postData();
+    }
   };
 
   const handleCourseSectionHover = (course: any) => {
