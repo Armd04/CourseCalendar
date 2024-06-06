@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { useRouter } from 'next/navigation';
 import styles from './styles/Calendar.module.css';
 import { get } from 'http';
+import { title } from 'process';
 
 const timeSlots = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -48,7 +49,6 @@ const Calendar: React.FC = () => {
 
   useEffect(() => {
     const user = localStorage.getItem('accessToken');
-    console.log(user);
     if (!user) {
       router.push('/login');
     }
@@ -62,7 +62,6 @@ const Calendar: React.FC = () => {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
             },
           });
-          const { username, email, courses } = response.data;
         } catch (error) {
           router.push('/login');
           console.log('Not logged in');
@@ -76,17 +75,9 @@ const Calendar: React.FC = () => {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           }
         });
-        console.log(response.data);
-        // setEvents(response.data['schedule'].map((event: any) => ({
-        //   day: event.day,
-        //   startTime: event.startTime,
-        //   endTime: event.endTime,
-        //   id: event.id,
-        //   courseComponent: event.courseComponent,
-        //   classSection: event.classSection,
-        //   title: event.title,
-        //   color: event.color
-        // })));
+        for (const course of response.data) {
+          handleInitialCourse(course);
+        }
       }
 
       getUser();
@@ -150,6 +141,34 @@ const Calendar: React.FC = () => {
     }
   };
 
+  const handleInitialCourse = (course: any) => {
+    const assignedColor = availableColors.shift();
+    const newEvents = course.scheduleData.map((schedule: any) => {
+      const days = schedule.classMeetingDayPatternCode.split('');
+      return days.map((day: string) => {
+        if (day === 'N') return null;
+        const startTime = new Date(schedule.classMeetingStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const endTime = new Date(schedule.classMeetingEndTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        return {
+          day: day === 'M' ? 'Monday' :
+            day === 'T' ? 'Tuesday' :
+              day === 'W' ? 'Wednesday' :
+                day === 'R' ? 'Thursday' :
+                  day === 'F' ? 'Friday' : '',
+          startTime: startTime,
+          endTime: endTime,
+          id: course.classNumber,
+          courseComponent: course.courseComponent,
+          classSection: course.classSection,
+          courseId: course.courseId,
+          title: course.title,
+          color: assignedColor
+        };
+      }).filter((event: any) => event !== null);
+    }).flat();
+    setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+  };
+
   const handleCourseSectionClick = (course: any) => {
     const assignedColor = availableColors.shift();
     const newEvents = course.scheduleData.map((schedule: any) => {
@@ -169,12 +188,29 @@ const Calendar: React.FC = () => {
           id: course.classNumber,
           courseComponent: course.courseComponent,
           classSection: course.classSection,
+          courseId: course.courseId,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
           color: assignedColor
         };
       }).filter((event: any) => event !== null);
     }).flat();
     setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+
+    const postData = async () => {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/add-course/`, {
+        course_id: course.courseId,
+        class_number: course.classNumber,
+        title: `${selectedSubject.toUpperCase()} ${courseCode}`, 
+      }, {
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        }
+      });
+    }
+
+    postData();
   };
 
   const handleCourseSectionHover = (course: any) => {
@@ -215,6 +251,22 @@ const Calendar: React.FC = () => {
       }
       return prevEvents.filter(event => event.id !== eventId);
     });
+    const postData = async () => {
+      const strEventId = eventId.toString();
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/remove-course/`, {
+        course_id: "6",
+        class_number: strEventId,
+        title: "79",
+      }, {
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        }
+      });
+    }
+
+    postData();
   };
 
   const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {

@@ -46,11 +46,12 @@ class AddcourseView(APIView):
         if serializer.is_valid():
             course_id = serializer.data.get('course_id')
             class_number = serializer.data.get('class_number')
+            title = serializer.data.get('title')
             user = User.objects.get(username=request.user.username)
             profile = user.profile
             if profile.courses.filter(class_number=class_number).exists():
                 return Response({'message': 'Course already exists'}, status=status.HTTP_400_BAD_REQUEST)
-            course = profile.courses.create(course_id=course_id, class_number=class_number)
+            course = profile.courses.create(course_id=course_id, class_number=class_number, title=title)
             profile.save()
             return Response({'message': 'Course added'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -64,6 +65,7 @@ class RemoveCourseView(APIView):
         if serializer.is_valid():
             course_id = serializer.data.get('course_id')
             class_number = serializer.data.get('class_number')
+            title = serializer.data.get('title')
             user = User.objects.get(username=request.user.username)
             profile = user.profile
             if not profile.courses.filter(class_number=class_number).exists():
@@ -88,12 +90,13 @@ class GetScheduleView(APIView):
         term = request.query_params.get('term')
         user = User.objects.get(username=request.user.username)
         profile = user.profile
-        courses = [(course.course_id, course.class_number) for course in profile.courses.all()]
+        courses = [(course.course_id, course.class_number, course.title) for course in profile.courses.all()]
         schedule = []
-        for course, class_number in courses:
+        for course, class_number, title in courses:
             response = requests.get('http://localhost:8000/api/class?term=' + str(term) + '&id=' + str(course))
             for section in response.json():
                 if str(section['classNumber']) == class_number:
+                    section['title'] = title
                     schedule.append(section)
         
         return Response(schedule, status=status.HTTP_200_OK)
