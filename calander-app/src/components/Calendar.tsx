@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/navigation';
 import styles from './styles/Calendar.module.css';
-import Image from 'next/image'; // If you're using Next.js
-import WaterlooLogo from './styles/WaterlooLogoLight.png'; // Adjust the import path as needed
+import Image from 'next/image';
+import WaterlooLogo from './styles/WaterlooLogoLight.png';
 
 
 const timeSlots = [
@@ -125,7 +125,7 @@ const Calendar: React.FC = () => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=1245&subject=${selectedSubject}&catalog_number=${inputCode}`);
         if (response.data.length > 0) {
           const lectures = response.data.filter((course: any) => course.courseComponent === 'LEC');
-          const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT');
+          const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT' || section.courseComponent === 'LAB');
           setLectureSections(lectures);
           setTutorialSections(tutorials);
         } else {
