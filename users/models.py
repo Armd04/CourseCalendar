@@ -7,6 +7,7 @@ class Profile(models.Model):
 
     class Course(models.Model):
         course_id = models.CharField(max_length=100)
+        class_number = models.CharField(max_length=100, blank=True)
     
     def __str__(self):
         return self.user.username

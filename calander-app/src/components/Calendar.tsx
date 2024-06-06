@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/navigation';
 import styles from './styles/Calendar.module.css';
+import { get } from 'http';
 
 const timeSlots = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -50,6 +51,47 @@ const Calendar: React.FC = () => {
     console.log(user);
     if (!user) {
       router.push('/login');
+    }
+    else {
+      const getUser = async () => {
+        try {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/logged-in/`, {
+            headers: {
+              'Accept': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          });
+          const { username, email, courses } = response.data;
+        } catch (error) {
+          router.push('/login');
+          console.log('Not logged in');
+        }
+      }
+      const getEvents = async () => {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-schedule/?term=1245`, {
+          headers: {
+            'Accept': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          }
+        });
+        console.log(response.data);
+        // setEvents(response.data['schedule'].map((event: any) => ({
+        //   day: event.day,
+        //   startTime: event.startTime,
+        //   endTime: event.endTime,
+        //   id: event.id,
+        //   courseComponent: event.courseComponent,
+        //   classSection: event.classSection,
+        //   title: event.title,
+        //   color: event.color
+        // })));
+      }
+
+      getUser();
+      getEvents();
+
     }
   }, []);
 
