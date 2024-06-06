@@ -1,11 +1,11 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
 from rest_framework import viewsets, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from CourseCalander import settings
 from .serializer import AddCourseSerializer
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 class TermDataView(APIView):
     def get(self, request, format=None):
@@ -38,59 +38,66 @@ class ClassScheduleView(APIView):
         else:
             return Response(response.text, status=response.status_code)
         
-class AddcourseView(LoginRequiredMixin, APIView):
+class AddcourseView(APIView):
     serializer_class = AddCourseSerializer
 
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             course_id = serializer.data.get('course_id')
-            user = request.user
+            class_number = serializer.data.get('class_number')
+            title = serializer.data.get('title')
+            user = User.objects.get(username=request.user.username)
             profile = user.profile
-            if profile.courses.filter(course_id=course_id).exists():
+            if profile.courses.filter(class_number=class_number).exists():
                 return Response({'message': 'Course already exists'}, status=status.HTTP_400_BAD_REQUEST)
-            course = profile.courses.create(course_id=course_id)
+            course = profile.courses.create(course_id=course_id, class_number=class_number, title=title)
             profile.save()
             return Response({'message': 'Course added'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RemoveCourseView(LoginRequiredMixin, APIView):
+class RemoveCourseView(APIView):
     serializer_class = AddCourseSerializer
 
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             course_id = serializer.data.get('course_id')
-            user = request.user
+            class_number = serializer.data.get('class_number')
+            title = serializer.data.get('title')
+            user = User.objects.get(username=request.user.username)
             profile = user.profile
-            if not profile.courses.filter(course_id=course_id).exists():
+            if not profile.courses.filter(class_number=class_number).exists():
                 return Response({'message': 'Course does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-            course = profile.courses.get(course_id=course_id)
+            course = profile.courses.get(class_number=class_number)
             course.delete()
             profile.save()
             return Response({'message': 'Course removed'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GetCoursesView(LoginRequiredMixin, APIView):
+class GetCoursesView(APIView):
     def get(self, request, format=None):
-        user = request.user
+        user = User.objects.get(username=request.user.username)
         profile = user.profile
-        courses = [course.course_id for course in profile.courses.all()]
+        courses = [course.class_number for course in profile.courses.all()]
         return Response({'courses' : courses}, status=status.HTTP_200_OK)
     
 
-class GetScheduleView(LoginRequiredMixin, APIView):
+class GetScheduleView(APIView):
     def get(self, request, format=None):
         term = request.query_params.get('term')
-        user = request.user
+        user = User.objects.get(username=request.user.username)
         profile = user.profile
-        courses = [course.course_id for course in profile.courses.all()]
+        courses = [(course.course_id, course.class_number, course.title) for course in profile.courses.all()]
         schedule = []
-        for course in courses:
+        for course, class_number, title in courses:
             response = requests.get('http://localhost:8000/api/class?term=' + str(term) + '&id=' + str(course))
-            schedule.append(response.json())
+            for section in response.json():
+                if str(section['classNumber']) == class_number:
+                    section['title'] = title
+                    schedule.append(section)
         
         return Response(schedule, status=status.HTTP_200_OK)
     
