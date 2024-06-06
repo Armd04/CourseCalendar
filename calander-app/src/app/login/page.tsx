@@ -37,10 +37,11 @@ const Login: React.FC = () => {
 
   return (
     <div className={styles.body}>
-      <div className={styles.loginContainer}>
-        <div className={styles.logoContainer}>
-          <Image src={WaterlooLogo} alt="Waterloo Logo" layout="intrinsic" width={150} height={150} />
+      <div className={styles.bar}></div>
+      <div className={styles.logoContainer}>
+          <Image src={WaterlooLogo} alt="Waterloo Logo" layout="intrinsic" width={400} height={400} />
         </div>
+      <div className={styles.loginContainer}>
         <h1 className={styles.heading}>Log in</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
           <label className={styles.label} htmlFor="username">Email</label>

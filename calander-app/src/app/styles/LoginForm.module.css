@@ -1,103 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
-
 .body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(to right, #F2EDA8, #f1f1f1);
-  margin: 0;
-  font-family: 'Roboto', sans-serif;
-}
-
-.loginContainer {
   background: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
+  padding-top: 20px; /* Ensure there is space at the top for the bar */
+}
+
+.bar {
   width: 100%;
-  text-align: center;
+  height: 20px; /* Adjust height as needed */
+  background: linear-gradient(to right, #f2eda8, #fae100, #fed34c, #eaab00); /* Gradient colors */
+  position: fixed; /* Fix the bar at the top */
+  top: 0;
+  left: 0;
+  z-index: 1; /* Ensure the bar stays on top */
 }
-
-.heading {
-  margin-bottom: 1.5rem;
-  font-size: 2rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.label {
-  font-size: 1rem;
-  color: #333;
-  text-align: left;
-}
-
-.inputText,
-.inputPassword {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: #f1f1f1;
-}
-
-.inputText::placeholder,
-.inputPassword::placeholder {
-  color: #aaa;
-  font-weight: 400;
-}
-
-.inputText:focus,
-.inputPassword:focus {
-  border-color: #2575fc;
-  outline: none;
-  background-color: #fff;
-}
-
-.button {
-  padding: 0.75rem;
-  background: #2575fc;
-  border: none;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.button:hover {
-  background: #1e5db9;
-}
-
-.message {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #ff4d4d;
-}
-
-.registerLink {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #333;
-}
-
-.registerLink a {
-  color: #2575fc;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.registerLink a:hover {
-  color: #1e5db9;
-}
-
 
 .loginContainer {
   background-color: #fff;
@@ -105,8 +23,57 @@
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
+  width: 40%;
+  margin-top: 40px; /* Space between the bar and the login container */
 }
 
 .logoContainer {
   margin-bottom: 20px;
+}
+
+.heading {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #555;
+}
+
+.inputText, .inputPassword {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.button {
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: red;
+}
+
+.registerLink {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #007bff;
 }
