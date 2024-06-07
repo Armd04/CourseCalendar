@@ -312,8 +312,8 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className={styles['calendar-container']}>
-      <div className={styles.sidebar}>
+    <div className={`d-flex ${styles['calendar-container']}`}>
+      <div className={`d-flex flex-column align-items-center ${styles.sidebar}`}>
         <div className={styles.logoContainer}>
           <Image src={WaterlooLogo} alt="Waterloo Logo" width={100} height={100} />
         </div>
@@ -322,51 +322,54 @@ const Calendar: React.FC = () => {
           placeholder="Subject..."
           classNamePrefix="react-select"
           onChange={handleSubjectChange}
+          className="w-100" // Full width for Select component
         />
         <input
           type="text"
           value={courseCode}
           placeholder="Code..."
           onChange={handleSearch}
-          className={styles.input}
+          className={`form-control mt-3 w-100 ${styles.input}`} // Full width for input
         />
-        <div className={styles['course-sections-container']}>
-          {lectureSections.map((section) => (
-            <div
-              key={section.classNumber}
-              onClick={() => handleCourseSectionClick(section)}
-              onMouseEnter={() => handleCourseSectionHover(section)}
-              onMouseLeave={handleCourseSectionLeave}
-              className={styles['course-section-item']}
-            >
-              {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
-            </div>
-          ))}
-        </div>
-        <div className={styles['course-sections-container']}>
-          {tutorialSections.map((section) => (
-            <div
-              key={section.classNumber}
-              onClick={() => handleCourseSectionClick(section)}
-              onMouseEnter={() => handleCourseSectionHover(section)}
-              onMouseLeave={handleCourseSectionLeave}
-              className={styles['course-section-item']}
-            >
-              {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
-            </div>
-          ))}
+        <div className="d-flex flex-column flex-grow-1 w-100 mt-3">
+          <div className={`flex-grow-1 ${styles['course-sections-container']}`}>
+            {lectureSections.map((section) => (
+              <div
+                key={section.classNumber}
+                onClick={() => handleCourseSectionClick(section)}
+                onMouseEnter={() => handleCourseSectionHover(section)}
+                onMouseLeave={handleCourseSectionLeave}
+                className={`p-2 my-2 ${styles['course-section-item']}`}
+              >
+                {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
+              </div>
+            ))}
+          </div>
+          <div className={`flex-grow-1 ${styles['course-sections-container']} mt-2`}>
+            {tutorialSections.map((section) => (
+              <div
+                key={section.classNumber}
+                onClick={() => handleCourseSectionClick(section)}
+                onMouseEnter={() => handleCourseSectionHover(section)}
+                onMouseLeave={handleCourseSectionLeave}
+                className={`p-2 my-2 ${styles['course-section-item']}`}
+              >
+                {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className={styles.content}>
-        <table className={styles.table}>
+      <div className={`flex-grow-1 p-3 ${styles.content}`}>
+        <table className={`table ${styles.table}`}>
           <thead>
             <tr>
-              <th className={styles['time-th']}>Time</th>
-              <th className={styles.th}>Monday</th>
-              <th className={styles.th}>Tuesday</th>
-              <th className={styles.th}>Wednesday</th>
-              <th className={styles.th}>Thursday</th>
-              <th className={styles.th}>Friday</th>
+              <th className={`text-center ${styles['time-th']}`}>Time</th>
+              <th className={`text-center ${styles.th}`}>Monday</th>
+              <th className={`text-center ${styles.th}`}>Tuesday</th>
+              <th className={`text-center ${styles.th}`}>Wednesday</th>
+              <th className={`text-center ${styles.th}`}>Thursday</th>
+              <th className={`text-center ${styles.th}`}>Friday</th>
             </tr>
           </thead>
           <tbody>

@@ -36,36 +36,36 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={styles.body}>
+    <div className={`d-flex flex-column align-items-center vh-100 ${styles.body}`}>
       <div className={styles.bar}></div>
       <div className={styles.logoContainer}>
-          <Image src={WaterlooLogo} alt="Waterloo Logo" layout="intrinsic" width={400} height={400} />
-        </div>
-      <div className={styles.loginContainer}>
+        <Image src={WaterlooLogo} alt="Waterloo Logo" layout="intrinsic" width={400} height={400} />
+      </div>
+      <div className={`card ${styles.loginContainer}`}>
         <h1 className={styles.heading}>Log in</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <label className={styles.label} htmlFor="username">Email</label>
+          <label className={`form-label ${styles.label}`} htmlFor="username">Email</label>
           <input
             type="text"
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className={styles.inputText}
+            className={`form-control ${styles.inputText}`}
             placeholder="Email"
           />
-          <label className={styles.label} htmlFor="password">Password</label>
+          <label className={`form-label ${styles.label}`} htmlFor="password">Password</label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={styles.inputPassword}
+            className={`form-control ${styles.inputPassword}`}
             placeholder="Password"
           />
-          <button type="submit" className={styles.button}>Login</button>
+          <button type="submit" className={`btn btn-primary w-100 ${styles.button}`}>Login</button>
         </form>
-        {message && <p className={styles.message}>{message}</p>}
-        <p className={styles.registerLink}>
+        {message && <p className={`mt-3 text-danger text-center ${styles.message}`}>{message}</p>}
+        <p className={`mt-3 text-center ${styles.registerLink}`}>
           Don't have an account? <Link href="/register">Register</Link>
         </p>
       </div>
