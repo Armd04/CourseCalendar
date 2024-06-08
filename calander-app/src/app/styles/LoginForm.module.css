@@ -20,7 +20,7 @@
 .loginContainer {
   background-color: #fff;
   padding: 20px 40px;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
   width: 40%;
@@ -31,7 +31,12 @@
   margin-bottom: 20px;
 }
 
-.heading {
+.CCheading {
+  font-size: 36px;
+  color: #333;
+}
+
+.Loginheading {
   margin-bottom: 20px;
   font-size: 24px;
   color: #333;
@@ -42,38 +47,120 @@
   flex-direction: column;
 }
 
-.label {
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: #555;
+.inputGroup {
+  position: relative;
 }
 
-.inputText, .inputPassword {
+.label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  background: #fff;
+  padding: 0 5px;
+  color: #555;
+  transition: 0.2s;
+  pointer-events: none;
+  background: transparent; /* Remove background color */
+}
+
+.inputText,
+.inputPassword {
+  width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
+  transition: border 0.2s;
+}
+
+.inputText:focus,
+.inputPassword:focus {
+  border: 2px solid #000; /* Make the border a little bolder on focus */
+  box-shadow: none; /* Remove default box-shadow */
+}
+
+.inputText:focus + .label,
+.inputPassword:focus + .label,
+.inputText:not(:placeholder-shown) + .label,
+.inputPassword:not(:placeholder-shown) + .label {
+  left: -5px; /* Move the label up */
+  top: -5px;
+  transform: translateY(-100%);
+  font-size: 13px;
+  color: #000;
+}
+
+.eyeButton {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
 }
 
 .button {
-  padding: 10px;
-  background-color: #007bff;
+  padding: 10px 20px;
+  background-color: #333;
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 30px;
   cursor: pointer;
   font-size: 16px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.3s;
 }
 
-.message {
-  margin-top: 10px;
+.button:hover {
+  background-color: #555;
+}
+
+.loading {
+  display: inline-block;
+  position: relative;
+  color: #fff;
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  animation: ellipsis 1.8s infinite;
+}
+
+
+@keyframes ellipsis {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
+  100% {
+    content: '';
+  }
+}
+
+.registerText {
   font-size: 14px;
-  color: red;
+  color: #000; /* Set color to black */
 }
 
 .registerLink {
-  margin-top: 15px;
-  font-size: 14px;
-  color: #007bff;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #000; /* Set color to black */
 }

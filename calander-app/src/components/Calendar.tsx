@@ -29,7 +29,6 @@ const firstIndex = (startTime: string, timeSlots: string[]) => {
   return Math.floor(formatTime(startTime) - formatTime(timeSlots[0]));
 }
 
-
 const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -239,7 +238,6 @@ const Calendar: React.FC = () => {
       return;
     }
 
-
     if (checkConflictResult) {
       setEvents((prevEvents) => [...prevEvents, ...newEvents]);
       postData();
@@ -315,37 +313,43 @@ const Calendar: React.FC = () => {
     <div className={`d-flex ${styles['calendar-container']}`}>
       <div className={`d-flex flex-column align-items-center ${styles.sidebar}`}>
         <div className={styles.logoContainer}>
-          <Image src={WaterlooLogo} alt="Waterloo Logo" width={100} height={100} />
+          <Image 
+            src={WaterlooLogo} 
+            alt="Waterloo Logo" 
+            priority 
+            width={100} 
+            height={100} 
+            style={{ width: 'auto', height: 'auto' }} 
+          />
         </div>
         <Select
           options={subjects}
           placeholder="Subject..."
-          classNamePrefix="react-select"
           onChange={handleSubjectChange}
-          className="w-100" // Full width for Select component
+          className={`w-100 mt-3 ${styles.select}`}
         />
         <input
           type="text"
           value={courseCode}
           placeholder="Code..."
           onChange={handleSearch}
-          className={`form-control mt-3 w-100 ${styles.input}`} // Full width for input
+          className={`form-control mt-3 ${styles.input}`}
         />
-        <div className="d-flex flex-column flex-grow-1 w-100 mt-3">
-          <div className={`flex-grow-1 ${styles['course-sections-container']}`}>
+        <div className="d-flex flex-column flex-grow-1 w-100">
+          <div className={`flex-grow-1 ${styles['course-sections-container']} mt-3`}>
             {lectureSections.map((section) => (
               <div
                 key={section.classNumber}
                 onClick={() => handleCourseSectionClick(section)}
                 onMouseEnter={() => handleCourseSectionHover(section)}
                 onMouseLeave={handleCourseSectionLeave}
-                className={`p-2 my-2 ${styles['course-section-item']}`}
+                className={`p-2 ${styles['course-section-item']}`}
               >
                 {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
               </div>
             ))}
           </div>
-          <div className={`flex-grow-1 ${styles['course-sections-container']} mt-2`}>
+          <div className={`flex-grow-1 ${styles['course-sections-container']} mt-3`}>
             {tutorialSections.map((section) => (
               <div
                 key={section.classNumber}
@@ -361,7 +365,7 @@ const Calendar: React.FC = () => {
         </div>
       </div>
       <div className={`flex-grow-1 p-3 ${styles.content}`}>
-        <table className={`table ${styles.table}`}>
+        <table className={`${styles.table}`}>
           <thead>
             <tr>
               <th className={`text-center ${styles['time-th']}`}>Time</th>

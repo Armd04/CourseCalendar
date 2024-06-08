@@ -1,66 +1,151 @@
 .body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(to right, #6a11cb, #2575fc);
-  margin: 0;
-  font-family: Arial, sans-serif;
+  background: #fff;
+  padding-top: 20px; /* Ensure there is space at the top for the bar */
+}
+
+.bar {
+  width: 100%;
+  height: 20px; /* Adjust height as needed */
+  background: linear-gradient(to right, #f2eda8, #fae100, #fed34c, #eaab00); /* Gradient colors */
+  position: fixed; /* Fix the bar at the top */
+  top: 0;
+  left: 0;
+  z-index: 1; /* Ensure the bar stays on top */
+}
+
+.RegisterContainer {
+  background-color: #fff;
+  padding: 20px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 40%;
+  margin-top: 40px; /* Space between the bar and the login container */
+}
+
+.loginContainer {
+  background-color: #fff;
+  padding: 20px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 40%;
+  margin-top: 40px; /* Space between the bar and the login container */
+}
+
+.logoContainer {
+  margin-bottom: 20px;
+}
+
+.CCheading {
+  font-size: 36px;
+  color: #333;
+}
+
+.Registerheading {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
 }
 
 .form {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputGroup {
+  position: relative;
+}
+
+.label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
   background: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
+  padding: 0 5px;
+  color: #555;
+  transition: 0.2s;
+  pointer-events: none;
+  background: transparent; /* Remove background color */
+}
+
+
+.inputText,
+.inputPassword {
   width: 100%;
-  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border 0.2s;
 }
 
-.formGroup {
-  margin-bottom: 1rem;
-  text-align: left;
+.inputText:focus,
+.inputPassword:focus {
+  border: 2px solid #000; /* Make the border a little bolder on focus */
+  box-shadow: none; /* Remove default box-shadow */
 }
 
-.formLabel {
-  display: block;
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+.inputText:focus + .label,
+.inputPassword:focus + .label,
+.inputText:not(:placeholder-shown) + .label,
+.inputPassword:not(:placeholder-shown) + .label {
+  left: -5px; /* Move the label up */
+  top: -5px;
+  transform: translateY(-100%);
+  font-size: 13px;
+  color: #000;
 }
 
-.formInput {
-  width: calc(100% - 2rem);
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.formInput:focus {
-  border-color: #2575fc;
-  outline: none;
-}
-
-.submitButton {
-  padding: 0.75rem;
-  background: #2575fc;
-  border: none;
-  border-radius: 4px;
+.button {
+  padding: 10px 20px;
+  background-color: #333;
   color: #fff;
-  font-size: 1rem;
+  border: none;
+  border-radius: 30px;
   cursor: pointer;
-  transition: background 0.3s ease;
-  width: 100%;
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.3s;
 }
 
-.submitButton:hover {
-  background: #1e5db9;
+.button:hover {
+  background-color: #555;
 }
 
-.message {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #ff4d4d;
+.loading {
+  display: inline-block;
+  position: relative;
+  color: #fff;
 }
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  animation: ellipsis 1.8s infinite;
+}
+
+
+@keyframes ellipsis {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
+  100% {
+    content: '';
+  }
+}
+
