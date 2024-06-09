@@ -13,7 +13,9 @@ import viewIcon from '../styles/view.png'; // View icon path
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,6 +35,10 @@ const Login: React.FC = () => {
       localStorage.setItem('refreshToken', refresh);
       router.push('/');
     } catch (error) {
+      setMessage('Login failed. Wrong username or password.');
+      setError(true); // Set error state to true if login fails
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +63,7 @@ const Login: React.FC = () => {
       <div className={`card ${styles.loginContainer}`}>
         <h1 className={styles.Loginheading}>Log in</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={`mt-3 mb-3 ${styles.inputGroup}`}>
+          <div className={`mt-3 mb-3 ${styles.inputGroup} ${error ? styles.errorInput : ''}`}>
             <input
               type="text"
               id="username"
@@ -68,7 +74,7 @@ const Login: React.FC = () => {
             />
             <label className={styles.label} htmlFor="username">Username</label>
           </div>
-          <div className={`mt-3 mb-3 ${styles.inputGroup}`}>
+          <div className={`mt-3 mb-3 ${styles.inputGroup} ${error ? styles.errorInput : ''}`}>
             <input
               type={showPassword ? 'text' : 'password'}
               id="password"
@@ -88,6 +94,7 @@ const Login: React.FC = () => {
             </button>
           </div>
         </form>
+        {message && <p className={`mt-3 text-center ${styles.message} ${error ? styles.errorMessage : ''}`}>{message}</p>}
         <p className={`mt-3 text-center ${styles.registerText}`}>
           Don't have an account? <Link href="/register"><span className={styles.registerLink}>Register</span></Link>
         </p>

@@ -123,6 +123,8 @@
   border: 1px solid #ccc;
   width: 100%;
   overflow-y: auto;
+  height: 100%; /* Set to desired fixed height */
+  overflow-y: auto; /* Add a scrollbar if the content overflows *
 }
 
 .course-sections-container::-webkit-scrollbar {

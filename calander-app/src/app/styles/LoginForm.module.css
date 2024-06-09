@@ -91,6 +91,16 @@
   color: #000;
 }
 
+
+.errorInput .inputText,
+.errorInput .inputPassword {
+  border-color: red;
+}
+
+.errorMessage {
+  color: red;
+}
+
 .eyeButton {
   position: absolute;
   top: 50%;

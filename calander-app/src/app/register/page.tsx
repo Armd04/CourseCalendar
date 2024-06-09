@@ -13,36 +13,66 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false as boolean);
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
+    setError(false);
+    let response;
 
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/register/`,
-        {
-          username,
-          email,
-          password,
-        },
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-        }
-      );
-      if (response.status === 201) {
-        setMessage('Registration successful.');
-        router.push('/login');
-      } else {
-        setMessage('Registration failed. Please try again.');
-      }
-    } catch (error) {
-    } finally {
+    if (username.trim() === '') {
+      setMessage('Username is required.');
+      setError(true);
       setLoading(false);
+    }
+  
+    else if (email.trim() === '') {
+      setMessage('Email is required.');
+      setError(true);
+      setLoading(false);
+    }
+  
+    else if (password.trim() === '') {
+      setMessage('Password is required.');
+      setError(true);
+      setLoading(false);
+    }
+
+    else {
+      try {
+        response = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/register/`,
+          {
+            username,
+            email,
+            password,
+          },
+          {
+            headers: {
+              'Accept': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          }
+        );
+
+        if (response.status === 201) {
+          router.push('/login');
+        } else {
+          setMessage(response.data.message || 'Registration failed. Please try again.');
+          setError(true);
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          setMessage(error.response?.data.message || 'Registration failed. Please try again.');
+        } else {
+          setMessage('Registration failed. Please try again.');
+        }
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -101,8 +131,8 @@ const RegisterForm = () => {
               {loading ? <span className={styles.loading}>Loading<span className={styles.dots}></span></span> : 'Register'}
             </button>
           </div>
+          {message && <p className={`mt-3 text-center ${styles.message} ${error ? styles.errorMessage : ''}`}>{message}</p>}
         </form>
-        {message && <p className={`mt-3 text-center ${styles.message}`}>{message}</p>}
       </div>
     </div>
   );

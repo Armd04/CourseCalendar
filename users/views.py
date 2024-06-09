@@ -42,8 +42,10 @@ class RegisterView(APIView):
             username = serializer.data.get('username')
             password = serializer.data.get('password')
             email = serializer.data.get('email')
-            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
-                return Response({'message': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(username=username).exists():
+                return Response({'message': 'Account with this username already exists. Please choose another one.'}, status=status.HTTP_409_CONFLICT)
+            elif User.objects.filter(email=email).exists():
+                return Response({'message': 'Account with this email already exists.'}, status=status.HTTP_409_CONFLICT)
             user = User.objects.create_user(username=username, password=password, email=email)
             user.save()
             profile = Profile(user=user)

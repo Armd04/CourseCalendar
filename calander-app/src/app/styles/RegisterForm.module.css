@@ -102,6 +102,10 @@
   color: #000;
 }
 
+.errorMessage {
+  color: red;
+}
+
 .button {
   padding: 10px 20px;
   background-color: #333;

@@ -343,7 +343,7 @@ const Calendar: React.FC = () => {
                 onClick={() => handleCourseSectionClick(section)}
                 onMouseEnter={() => handleCourseSectionHover(section)}
                 onMouseLeave={handleCourseSectionLeave}
-                className={`p-2 ${styles['course-section-item']}`}
+                className={`p-2 my-2 ${styles['course-section-item']}`}
               >
                 {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
               </div>
