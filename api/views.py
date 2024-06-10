@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 import requests
 from CourseCalander import settings
 from .serializer import AddCourseSerializer
+from users.models import Course
 
 class TermDataView(APIView):
     def get(self, request, format=None):
@@ -51,7 +52,13 @@ class AddcourseView(APIView):
             profile = user.profile
             if profile.courses.filter(class_number=class_number).exists():
                 return Response({'message': 'Course already exists'}, status=status.HTTP_400_BAD_REQUEST)
-            course = profile.courses.create(course_id=course_id, class_number=class_number, title=title)
+            course = None
+            if Course.objects.filter(class_number=class_number).exists():
+                course = Course.objects.get(class_number=class_number)
+            else:
+                course = Course.objects.create(course_id=course_id, class_number=class_number, title=title)
+            
+            profile.courses.add(course)
             profile.save()
             return Response({'message': 'Course added'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -71,7 +78,7 @@ class RemoveCourseView(APIView):
             if not profile.courses.filter(class_number=class_number).exists():
                 return Response({'message': 'Course does not exist'}, status=status.HTTP_400_BAD_REQUEST)
             course = profile.courses.get(class_number=class_number)
-            course.delete()
+            profile.courses.remove(course)
             profile.save()
             return Response({'message': 'Course removed'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
