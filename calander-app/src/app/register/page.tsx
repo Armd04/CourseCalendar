@@ -117,7 +117,7 @@ const RegisterForm = () => {
           </div>
           <div className={`mt-3 mb-3 ${styles.inputGroup}`}>
             <input
-              type="password"
+              type="text"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -127,7 +127,7 @@ const RegisterForm = () => {
             <label className={styles.label} htmlFor="password">Password</label>
           </div>
           <div className="d-flex justify-content-center">
-            <button type="submit" className={`btn btn-primary w-40 ${styles.button}`} disabled={loading}>
+            <button type="submit" className={`w-40 ${styles.button}`} disabled={loading}>
               {loading ? <span className={styles.loading}>Loading<span className={styles.dots}></span></span> : 'Register'}
             </button>
           </div>

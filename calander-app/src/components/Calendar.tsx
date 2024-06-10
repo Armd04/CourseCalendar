@@ -31,7 +31,9 @@ const firstIndex = (startTime: string, timeSlots: string[]) => {
 
 const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
+  const [terms, setTerms] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
+  const [selectedTerm, setSelectedTerm] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [courseCode, setCourseCode] = useState<string>('');
   const [lectureSections, setLectureSections] = useState<any[]>([]);
@@ -90,6 +92,28 @@ const Calendar: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-terms/`, {
+          headers: {
+            'Accept': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          }
+        });
+        setTerms(response.data['terms'].map((term: any) => ({ id: term.termCode, label: term.name, value: term.termCode })));
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.log(error.message);
+        } else {
+          console.log('An unexpected error occurred');
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-subjects/`, {
           headers: {
             'Accept': 'application/json',
@@ -109,6 +133,13 @@ const Calendar: React.FC = () => {
     fetchData();
   }, []);
 
+  const handleTermChange = (selectedOption: any) => {
+    setSelectedTerm(selectedOption.value);
+    setCourseCode('');
+    setLectureSections([]);
+    setTutorialSections([]);
+  };
+
   const handleSubjectChange = (selectedOption: any) => {
     setSelectedSubject(selectedOption.value);
     setCourseCode('');
@@ -116,12 +147,13 @@ const Calendar: React.FC = () => {
     setTutorialSections([]);
   };
 
+
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputCode = event.target.value;
     setCourseCode(inputCode);
     if (selectedSubject && inputCode) {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=1245&subject=${selectedSubject}&catalog_number=${inputCode}`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=${selectedTerm}&subject=${selectedSubject}&catalog_number=${inputCode}`);
         if (response.data.length > 0) {
           const lectures = response.data.filter((course: any) => course.courseComponent === 'LEC');
           const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT' || section.courseComponent === 'LAB');
@@ -322,6 +354,12 @@ const Calendar: React.FC = () => {
             style={{ width: 'auto', height: 'auto' }} 
           />
         </div>
+        <Select
+          options={terms}
+          placeholder="Term..."
+          onChange={handleTermChange}
+          className={`w-100 mt-3 ${styles.select}`}
+        />
         <Select
           options={subjects}
           placeholder="Subject..."

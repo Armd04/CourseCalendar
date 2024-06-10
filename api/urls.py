@@ -5,7 +5,8 @@ from .views import (TermDataView,
                     RemoveCourseView,
                     GetCoursesView,
                     GetScheduleView,
-                    GetSubjectsView,)
+                    GetSubjectsView,
+                    GetTermsView)
 
 urlpatterns = [
     path('term/', TermDataView.as_view(), name='term-api'),
@@ -15,4 +16,5 @@ urlpatterns = [
     path('get-courses/', GetCoursesView.as_view(), name='get-courses-api'),
     path('get-schedule/', GetScheduleView.as_view(), name='get-schedule-api'),
     path('get-subjects/', GetSubjectsView.as_view(), name='get-subjects-api'),
+    path('get-terms/', GetTermsView.as_view(), name='get-terms-api'),
 ]

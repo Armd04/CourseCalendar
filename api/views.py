@@ -101,8 +101,6 @@ class GetScheduleView(APIView):
         
         return Response(schedule, status=status.HTTP_200_OK)
     
-
-
 class GetSubjectsView(APIView):
     def get(self, request, format=None):
         headers = {'x-api-key': settings.API_KEY}
@@ -113,6 +111,17 @@ class GetSubjectsView(APIView):
         else:
             return Response(response.text, status=response.status_code)
         
-
-
+class GetTermsView(APIView):
+    def get(self, request, format=None):
+        headers = {'x-api-key': settings.API_KEY}
+        response = requests.get('https://openapi.data.uwaterloo.ca/v3/Terms', headers=headers)
+        if response.status_code == 200:
+            terms = [term for term in response.json()]
+            for i in range(len(terms)):
+                for j in range(0, len(terms)-i-1):
+                    if terms[j]['termCode'] < terms[j+1]['termCode']:
+                        terms[j], terms[j+1] = terms[j+1], terms[j]
+            return Response({'terms': terms}, status=status.HTTP_200_OK)
+        else:
+            return Response(response.text, status=response.status_code)
 
