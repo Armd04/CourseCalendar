@@ -17,4 +17,5 @@ class Course(models.Model):
     course_id = models.CharField(max_length=100)
     class_number = models.CharField(max_length=100, blank=True)
     title = models.CharField(max_length=100, blank=True)
+    term = models.CharField(max_length=100, default='1245')
 

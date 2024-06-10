@@ -48,6 +48,8 @@ class AddcourseView(APIView):
             course_id = serializer.data.get('course_id')
             class_number = serializer.data.get('class_number')
             title = serializer.data.get('title')
+            term = serializer.data.get('term')
+
             user = User.objects.get(username=request.user.username)
             profile = user.profile
             if profile.courses.filter(class_number=class_number).exists():
@@ -56,7 +58,7 @@ class AddcourseView(APIView):
             if Course.objects.filter(class_number=class_number).exists():
                 course = Course.objects.get(class_number=class_number)
             else:
-                course = Course.objects.create(course_id=course_id, class_number=class_number, title=title)
+                course = Course.objects.create(course_id=course_id, class_number=class_number, title=title, term=term)
             
             profile.courses.add(course)
             profile.save()
@@ -73,6 +75,7 @@ class RemoveCourseView(APIView):
             course_id = serializer.data.get('course_id')
             class_number = serializer.data.get('class_number')
             title = serializer.data.get('title')
+            term = serializer.data.get('term')
             user = User.objects.get(username=request.user.username)
             profile = user.profile
             if not profile.courses.filter(class_number=class_number).exists():
@@ -86,9 +89,10 @@ class RemoveCourseView(APIView):
 
 class GetCoursesView(APIView):
     def get(self, request, format=None):
+        term = request.query_params.get('term')
         user = User.objects.get(username=request.user.username)
         profile = user.profile
-        courses = [course.class_number for course in profile.courses.all()]
+        courses = [course.class_number for course in profile.courses.all() if course.term == term]
         return Response({'courses' : courses}, status=status.HTTP_200_OK)
     
 
@@ -97,7 +101,7 @@ class GetScheduleView(APIView):
         term = request.query_params.get('term')
         user = User.objects.get(username=request.user.username)
         profile = user.profile
-        courses = [(course.course_id, course.class_number, course.title) for course in profile.courses.all()]
+        courses = [(course.course_id, course.class_number, course.title) for course in profile.courses.all() if course.term == term]
         schedule = []
         headers = {'x-api-key': settings.API_KEY}
         for course, class_number, title in courses:

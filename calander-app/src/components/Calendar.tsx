@@ -1,10 +1,11 @@
 import axios from 'axios';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/navigation';
 import styles from './styles/Calendar.module.css';
 import Image from 'next/image';
 import WaterlooLogo from './styles/WaterlooLogoLight.png';
+import { get } from 'http';
 
 
 const timeSlots = [
@@ -33,7 +34,7 @@ const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
   const [terms, setTerms] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
-  const [selectedTerm, setSelectedTerm] = useState<string>('');
+  const [selectedTerm, setSelectedTerm] = useState<string>();
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [courseCode, setCourseCode] = useState<string>('');
   const [lectureSections, setLectureSections] = useState<any[]>([]);
@@ -71,7 +72,7 @@ const Calendar: React.FC = () => {
         }
       }
       const getEvents = async () => {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-schedule/?term=1245`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-schedule/?term=${selectedTerm}`, {
           headers: {
             'Accept': 'application/json',
             'Access-Control-Allow-Origin': '*',
@@ -133,12 +134,21 @@ const Calendar: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleTermChange = (selectedOption: any) => {
+  useEffect(() => {
+    if (selectedTerm) {
+      setCourseCode('');
+      setLectureSections([]);
+      setTutorialSections([]);
+      setEvents([]);
+      setHoveredEvents([]);
+      reloadEvents();
+    }
+  }, [selectedTerm]);
+
+  const handleTermChange = async (selectedOption: any) => {
     setSelectedTerm(selectedOption.value);
-    setCourseCode('');
-    setLectureSections([]);
-    setTutorialSections([]);
   };
+
 
   const handleSubjectChange = (selectedOption: any) => {
     setSelectedSubject(selectedOption.value);
@@ -147,6 +157,22 @@ const Calendar: React.FC = () => {
     setTutorialSections([]);
   };
 
+
+  const reloadEvents = () => {
+    const getEvents = async () => {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-schedule/?term=${selectedTerm}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        }
+      });
+      for (const course of response.data) {
+        handleInitialCourse(course);
+      }
+    }
+    getEvents();
+  }
 
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputCode = event.target.value;
@@ -254,6 +280,7 @@ const Calendar: React.FC = () => {
         course_id: course.courseId,
         class_number: course.classNumber,
         title: `${selectedSubject.toUpperCase()} ${courseCode}`, 
+        term: selectedTerm,
       }, {
         headers: {
           'Accept': 'application/json',
@@ -320,6 +347,7 @@ const Calendar: React.FC = () => {
         course_id: "6",
         class_number: strEventId,
         title: "79",
+        term: "1245",
       }, {
         headers: {
           'Accept': 'application/json',
