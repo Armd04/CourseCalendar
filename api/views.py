@@ -92,8 +92,11 @@ class GetScheduleView(APIView):
         profile = user.profile
         courses = [(course.course_id, course.class_number, course.title) for course in profile.courses.all()]
         schedule = []
+        headers = {'x-api-key': settings.API_KEY}
         for course, class_number, title in courses:
-            response = requests.get('http://localhost:8000/api/class?term=' + str(term) + '&id=' + str(course))
+            response = requests.get('https://openapi.data.uwaterloo.ca/v3/ClassSchedules/' + 
+                                str(term) + '/' + str(course),
+                                 headers=headers)
             for section in response.json():
                 if str(section['classNumber']) == class_number:
                     section['title'] = title
