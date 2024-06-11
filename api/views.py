@@ -139,3 +139,21 @@ class GetTermsView(APIView):
         else:
             return Response(response.text, status=response.status_code)
 
+
+class GetParticipantsView(APIView):
+    def get(self, request, format=None):
+        course_id = request.query_params.get('course_id')
+        class_number = request.query_params.get('class_number')
+        term = request.query_params.get('term')
+        headers = {'x-api-key': settings.API_KEY}
+        response = requests.get('https://openapi.data.uwaterloo.ca/v3/ClassSchedules/' + 
+                                str(term) + '/' + str(course_id),
+                                 headers=headers)
+        if response.status_code == 200:
+            for section in response.json():
+                if str(section['classNumber']) == class_number:
+                    return Response({'enrolledStudents': section['enrolledStudents'], 'maxEnrollmentCapacity': section['maxEnrollmentCapacity']}, status=status.HTTP_200_OK)
+            return Response({'message': 'Section not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(response.text, status=response.status_code)
+
