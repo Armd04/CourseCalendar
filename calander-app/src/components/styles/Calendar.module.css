@@ -147,6 +147,7 @@
 
 .course-section-item:hover {
   background-color: #ccc; /* Light grey background on hover */
+  color: #fff;
   transform: scale(1.03); /* Slightly increase size on hover */
 }
 

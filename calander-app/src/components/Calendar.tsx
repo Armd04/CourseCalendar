@@ -182,7 +182,22 @@ const Calendar: React.FC = () => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=${selectedTerm}&subject=${selectedSubject}&catalog_number=${inputCode}`);
         if (response.data.length > 0) {
           const lectures = response.data.filter((course: any) => course.courseComponent === 'LEC');
+          for (let i = 0; i < lectures.length; ++i){
+            const EnrolledResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-enrolled/?term=${selectedTerm}&course_id=${lectures[i].courseId}&class_number=${lectures[i].classNumber}`);
+            lectures[i] = {
+              ...lectures[i],
+              ...EnrolledResponse.data
+            };
+          }
           const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT' || section.courseComponent === 'LAB');
+          for (let i = 0; i < tutorials.length; ++i){
+            const EnrolledResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-enrolled/?term=${selectedTerm}&course_id=${tutorials[i].courseId}&class_number=${tutorials[i].classNumber}`);
+            tutorials[i] = {
+              ...tutorials[i],
+              ...EnrolledResponse.data
+            };
+          }
+
           setLectureSections(lectures);
           setTutorialSections(tutorials);
         } else {
@@ -221,7 +236,9 @@ const Calendar: React.FC = () => {
           classSection: course.classSection,
           courseId: course.courseId,
           title: course.title,
-          color: assignedColor
+          color: assignedColor,
+          enrolledStudents: course.enrolledStudents,
+          maxEnrollmentCapacity: course.maxEnrollmentCapacity,
         };
       }).filter((event: any) => event !== null);
     }).flat();
@@ -248,6 +265,8 @@ const Calendar: React.FC = () => {
           courseComponent: course.courseComponent,
           classSection: course.classSection,
           courseId: course.courseId,
+          enrolledStudents: course.enrolledStudents,
+          maxEnrollmentCapacity: course.maxEnrollmentCapacity,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
           color: assignedColor
         };
@@ -321,6 +340,8 @@ const Calendar: React.FC = () => {
           id: course.classNumber,
           courseComponent: course.courseComponent,
           classSection: course.classSection,
+          enrolledStudents: course.enrolledStudents,
+          maxEnrollmentCapacity: course.maxEnrollmentCapacity,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
           color: course.color || '#CCCCCC'
         };
@@ -454,7 +475,8 @@ const Calendar: React.FC = () => {
                         <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color }}>
                           <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
                           <strong>{event.title} - {event.courseComponent} {event.classSection}</strong><br />
-                          {event.startTime} to {event.endTime}
+                          {event.startTime} to {event.endTime}<br />
+                          {event.enrolledStudents}/{event.maxEnrollmentCapacity}
                         </div>
                       );
                     })}

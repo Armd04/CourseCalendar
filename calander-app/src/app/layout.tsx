@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
 import React, { ReactNode } from 'react';
-import './globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
 interface RootLayoutProps {
