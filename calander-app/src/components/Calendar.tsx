@@ -31,6 +31,8 @@ const firstIndex = (startTime: string, timeSlots: string[]) => {
 }
 
 const Calendar: React.FC = () => {
+  const defaultTerm = { id: '1245', label: 'Spring 2024', value: '1245' };
+
   const [slotHeight, setSlotHeight] = useState<number>(50);
   const [terms, setTerms] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -44,6 +46,7 @@ const Calendar: React.FC = () => {
   const [availableColors, setAvailableColors] = useState<string[]>(colors);
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
   const router = useRouter();
+  const selectRef = useRef<any>(null);
 
   useEffect(() => {
     if (timeSlotRef.current) {
@@ -99,7 +102,20 @@ const Calendar: React.FC = () => {
             'Access-Control-Allow-Origin': '*',
           }
         });
-        setTerms(response.data['terms'].map((term: any) => ({ id: term.termCode, label: term.name, value: term.termCode })));
+        const fetchedTerms = response.data['terms'].map((term: any) => ({ id: term.termCode, label: term.name, value: term.termCode }));
+        setTerms(fetchedTerms);
+
+
+        const defaultTermFromResponse = fetchedTerms.find((term: any) => term.id === defaultTerm.id);
+        console.log(defaultTermFromResponse);
+        if (defaultTermFromResponse) {
+
+          setSelectedTerm(defaultTermFromResponse.id);
+
+          if (selectRef.current) {
+            selectRef.current.setValue(defaultTermFromResponse);
+          }
+        }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.log(error.message);
@@ -135,6 +151,7 @@ const Calendar: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.log(selectedTerm);
     if (selectedTerm) {
       setCourseCode('');
       setLectureSections([]);
@@ -404,6 +421,7 @@ const Calendar: React.FC = () => {
           />
         </div>
         <Select
+          ref={selectRef}
           options={terms}
           placeholder="Term..."
           onChange={handleTermChange}
