@@ -93,6 +93,12 @@
   left: 2px;
   right: 2px;
   height: 100%;
+  font-size: 0.75em; 
+  display: flex; 
+  flex-direction: column; 
+  text-align: center; 
+  justify-content: center;
+  line-height: 0.75
 }
 
 .remove-button {
@@ -123,8 +129,7 @@
   border: 1px solid #ccc;
   width: 100%;
   overflow-y: auto;
-  height: 100%; /* Set to desired fixed height */
-  overflow-y: auto; /* Add a scrollbar if the content overflows *
+  height: 10px;
 }
 
 .course-sections-container::-webkit-scrollbar {

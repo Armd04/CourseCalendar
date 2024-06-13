@@ -7,15 +7,22 @@ import Image from 'next/image';
 import WaterlooLogo from './styles/WaterlooLogoLight.png';
 import { get } from 'http';
 
+function numberToColor(number: number): string {
+  if (number < 1 || number > 100000) {
+    throw new Error("Number must be between 1 and 100000");
+  }
+  const hue = number % 360;
+  
+  // For consistent saturation and lightness, use fixed values
+  const saturation = 70;
+  const lightness = 50;
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
 
 const timeSlots = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
   "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
-];
-
-const colors = [
-  "#F2EDA8", "#FAE100", "#FED34C", "#EAAB00", "#FFBF00", "#FFAC1C",
-  "#F28C28", "#FF7F50", "#FAD5A5", "#F4BB44"
 ];
 
 const formatTime = (time: string): number => {
@@ -43,7 +50,6 @@ const Calendar: React.FC = () => {
   const [tutorialSections, setTutorialSections] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [hoveredEvents, setHoveredEvents] = useState<any[]>([]);
-  const [availableColors, setAvailableColors] = useState<string[]>(colors);
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
   const router = useRouter();
   const selectRef = useRef<any>(null);
@@ -107,7 +113,6 @@ const Calendar: React.FC = () => {
 
 
         const defaultTermFromResponse = fetchedTerms.find((term: any) => term.id === defaultTerm.id);
-        console.log(defaultTermFromResponse);
         if (defaultTermFromResponse) {
 
           setSelectedTerm(defaultTermFromResponse.id);
@@ -165,7 +170,6 @@ const Calendar: React.FC = () => {
   const handleTermChange = async (selectedOption: any) => {
     setSelectedTerm(selectedOption.value);
   };
-
 
   const handleSubjectChange = (selectedOption: any) => {
     setSelectedSubject(selectedOption.value);
@@ -233,7 +237,6 @@ const Calendar: React.FC = () => {
   };
 
   const handleInitialCourse = (course: any) => {
-    const assignedColor = availableColors.shift();
     const newEvents = course.scheduleData.map((schedule: any) => {
       const days = schedule.classMeetingDayPatternCode.split('');
       return days.map((day: string) => {
@@ -253,7 +256,6 @@ const Calendar: React.FC = () => {
           classSection: course.classSection,
           courseId: course.courseId,
           title: course.title,
-          color: assignedColor,
           enrolledStudents: course.enrolledStudents,
           maxEnrollmentCapacity: course.maxEnrollmentCapacity,
         };
@@ -263,7 +265,6 @@ const Calendar: React.FC = () => {
   };
 
   const handleCourseSectionClick = (course: any) => {
-    const assignedColor = availableColors.shift();
     const newEvents = course.scheduleData.map((schedule: any) => {
       const days = schedule.classMeetingDayPatternCode.split('');
       return days.map((day: string) => {
@@ -285,7 +286,7 @@ const Calendar: React.FC = () => {
           enrolledStudents: course.enrolledStudents,
           maxEnrollmentCapacity: course.maxEnrollmentCapacity,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
-          color: assignedColor
+          color: numberToColor(course.classNumber)
         };
       }).filter((event: any) => event !== null);
     }).flat();
@@ -360,7 +361,7 @@ const Calendar: React.FC = () => {
           enrolledStudents: course.enrolledStudents,
           maxEnrollmentCapacity: course.maxEnrollmentCapacity,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
-          color: course.color || '#CCCCCC'
+          color: '#CCCCCC'
         };
       }).filter((event: any) => event !== null);
     }).flat();
@@ -374,9 +375,6 @@ const Calendar: React.FC = () => {
   const handleRemoveEvent = (eventId: string) => {
     setEvents((prevEvents) => {
       const eventToRemove = prevEvents.find(event => event.id === eventId);
-      if (eventToRemove) {
-        setAvailableColors([...availableColors, eventToRemove.color]);
-      }
       return prevEvents.filter(event => event.id !== eventId);
     });
     const postData = async () => {
@@ -490,11 +488,10 @@ const Calendar: React.FC = () => {
                     {[...events, ...hoveredEvents].filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
                       const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                       return (
-                        <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color }}>
+                        <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#CCCCC"}}>
                           <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
-                          <strong>{event.title} - {event.courseComponent} {event.classSection}</strong><br />
+                          <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
                           {event.startTime} to {event.endTime}<br />
-                          {event.enrolledStudents}/{event.maxEnrollmentCapacity}
                         </div>
                       );
                     })}
