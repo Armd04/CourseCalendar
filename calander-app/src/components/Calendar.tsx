@@ -7,17 +7,13 @@ import Image from 'next/image';
 import WaterlooLogo from './styles/WaterlooLogoLight.png';
 
 
-function numberToColor(number: number): string {
-  if (number < 1 || number > 100000) {
-    throw new Error("Number must be between 1 and 100000");
-  }
-  const hue = number % 360;
-  
-  // For consistent saturation and lightness, use fixed values
-  const saturation = 70;
-  const lightness = 50;
+function numberToColor(classNumber: number, courseId: number): string {
+  const hue = (classNumber * 3 + courseId * 5 - 100) % 360;
+  const saturation = 100;
+  const lightness = 15;
+  const alpha = 1;
 
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
 }
 
 const timeSlots = [
@@ -258,28 +254,45 @@ const Calendar: React.FC = () => {
   const handleInitialCourse = (course: any) => {
     const newEvents = course.scheduleData.map((schedule: any) => {
       const days = schedule.classMeetingDayPatternCode.split('');
-      return days.map((day: string) => {
-        if (day === 'N') return null;
-        const startTime = new Date(schedule.classMeetingStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const endTime = new Date(schedule.classMeetingEndTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      if (days.length != 0){
+        return days.map((day: string) => {
+          if (day === 'N') return null;
+          const startTime = new Date(schedule.classMeetingStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const endTime = new Date(schedule.classMeetingEndTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          return {
+            day: day === 'M' ? 'Monday' :
+              day === 'T' ? 'Tuesday' :
+                day === 'W' ? 'Wednesday' :
+                  day === 'R' ? 'Thursday' :
+                    day === 'F' ? 'Friday' : '',
+            startTime: startTime,
+            endTime: endTime,
+            id: course.classNumber,
+            courseComponent: course.courseComponent,
+            classSection: course.classSection,
+            enrolledStudents: course.enrolledStudents,
+            maxEnrollmentCapacity: course.maxEnrollmentCapacity,
+            title: course.title,
+            color: numberToColor(course.classNumber, course.courseId)
+          };
+        }).filter((event: any) => event !== null);
+      }
+      else {
+        let day = onlineDay[0];
+        onlineDay.shift();
         return {
-          day: day === 'M' ? 'Monday' :
-            day === 'T' ? 'Tuesday' :
-              day === 'W' ? 'Wednesday' :
-                day === 'R' ? 'Thursday' :
-                  day === 'F' ? 'Friday' : '',
-          startTime: startTime,
-          endTime: endTime,
+          day: day,
+          startTime: '00:00 AM',
+          endTime: '00:00 AM',
           id: course.classNumber,
           courseComponent: course.courseComponent,
           classSection: course.classSection,
-          courseId: course.courseId,
-          title: course.title,
           enrolledStudents: course.enrolledStudents,
           maxEnrollmentCapacity: course.maxEnrollmentCapacity,
-          color: numberToColor(course.classNumber)
+          title: course.title,
+          color: numberToColor(course.classNumber, course.courseId)
         };
-      }).filter((event: any) => event !== null);
+      }
     }).flat();
     setEvents((prevEvents) => [...prevEvents, ...newEvents]);
   };
@@ -306,7 +319,7 @@ const Calendar: React.FC = () => {
             enrolledStudents: course.enrolledStudents,
             maxEnrollmentCapacity: course.maxEnrollmentCapacity,
             title: `${selectedSubject.toUpperCase()} ${courseCode}`,
-            color: numberToColor(course.classNumber)
+            color: numberToColor(course.classNumber, course.courseId)
           };
         }).filter((event: any) => event !== null);
       }
@@ -323,7 +336,7 @@ const Calendar: React.FC = () => {
           enrolledStudents: course.enrolledStudents,
           maxEnrollmentCapacity: course.maxEnrollmentCapacity,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
-          color: numberToColor(course.classNumber)
+          color: numberToColor(course.classNumber, course.courseId)
         };
       }
     }).flat();
@@ -399,7 +412,7 @@ const Calendar: React.FC = () => {
             enrolledStudents: course.enrolledStudents,
             maxEnrollmentCapacity: course.maxEnrollmentCapacity,
             title: `${selectedSubject.toUpperCase()} ${courseCode}`,
-            color: '#CCCCCC'
+            color: '#888888'
           };
         }).filter((event: any) => event !== null);
       }
@@ -415,7 +428,7 @@ const Calendar: React.FC = () => {
           enrolledStudents: course.enrolledStudents,
           maxEnrollmentCapacity: course.maxEnrollmentCapacity,
           title: `${selectedSubject.toUpperCase()} ${courseCode}`,
-          color: '#CCCCCC'
+          color: '#888888'
         };
       }
     }).flat();
@@ -522,7 +535,7 @@ const Calendar: React.FC = () => {
                   {[...events, ...hoveredEvents].filter(event => event.day == day && event.startTime == '00:00 AM' && event.endTime == '00:00 AM').map(event => {
                       const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                       return (
-                        <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#CCCCCC"}}>
+                        <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#888888"}}>
                           <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
                           <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
                         </div>
@@ -549,7 +562,7 @@ const Calendar: React.FC = () => {
                       {[...events, ...hoveredEvents].filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
                         const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                         return (
-                          <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#CCCCCC"}}>
+                          <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#888888"}}>
                             <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
                             <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
                             {event.startTime} to {event.endTime}<br />
