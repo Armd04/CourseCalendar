@@ -88,7 +88,6 @@
   text-overflow: ellipsis;
   align-items: center;
   text-align: center;
-  font-size: 14px;
   position: absolute;
   left: 2px;
   right: 2px;
@@ -151,9 +150,46 @@
 }
 
 .course-section-item:hover {
-  background-color: #ccc; /* Light grey background on hover */
+  background-color: #ccc;
   color: #fff;
-  transform: scale(1.03); /* Slightly increase size on hover */
+  transform: scale(1.03);
+}
+
+.online-courses-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  background-color: #ffffff;
+  color: #000;
+  padding: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  white-space: nowrap;
+  margin-left: 4%;
+}
+
+.online-courses-container::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+.online-course-event {
+  display: inline-block;
+  position: relative;
+  padding: 5px;
+  color: #fff;
+  border-radius: 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75em; 
+  display: flex; 
+  flex-direction: column; 
+  text-align: center; 
+  justify-content: center;
+  line-height: 0.75;
+  width: 19%;
+  flex-shrink: 0;
 }
 
 .logoContainer {

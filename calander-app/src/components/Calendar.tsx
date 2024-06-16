@@ -6,6 +6,18 @@ import styles from './styles/Calendar.module.css';
 import Image from 'next/image';
 import WaterlooLogo from './styles/WaterlooLogoLight.png';
 
+interface Event {
+  day: string;
+  startTime: string;
+  endTime: string;
+  id: number;
+  courseComponent: string;
+  classSection: string;
+  enrolledStudents: number;
+  maxEnrollmentCapacity: number;
+  title: string;
+  color: string;
+}
 
 function numberToColor(classNumber: number, courseId: number): string {
   const hue = (classNumber * 3 + courseId * 5 - 100) % 360;
@@ -20,10 +32,6 @@ const timeSlots = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
   "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
 ];
-
-let onlineDay = [
-  "1", "2", "3", "4", "5"
-]
 
 const formatTime = (time: string): number => {
   const [hour, minutePart] = time.split(':');
@@ -278,10 +286,8 @@ const Calendar: React.FC = () => {
         }).filter((event: any) => event !== null);
       }
       else {
-        let day = onlineDay[0];
-        onlineDay.shift();
         return {
-          day: day,
+          day: "Online",
           startTime: '00:00 AM',
           endTime: '00:00 AM',
           id: course.classNumber,
@@ -294,7 +300,7 @@ const Calendar: React.FC = () => {
         };
       }
     }).flat();
-    setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+    setEvents(prevEvents => [...prevEvents, ...newEvents]);
   };
 
   const handleCourseSectionClick = (course: any) => {
@@ -324,10 +330,8 @@ const Calendar: React.FC = () => {
         }).filter((event: any) => event !== null);
       }
       else {
-        let day = onlineDay[0];
-        onlineDay.shift();
         return {
-          day: day,
+          day: "Online",
           startTime: '00:00 AM',
           endTime: '00:00 AM',
           id: course.classNumber,
@@ -385,7 +389,7 @@ const Calendar: React.FC = () => {
     }
 
     if (checkConflictResult) {
-      setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+      setEvents(prevEvents => [...prevEvents, ...newEvents]);
       postData();
     }
   };
@@ -417,9 +421,8 @@ const Calendar: React.FC = () => {
         }).filter((event: any) => event !== null);
       }
       else {
-        let day = onlineDay[0];
         return {
-          day: day,
+          day: "Online",
           startTime: '00:00 AM',
           endTime: '00:00 AM',
           id: course.classNumber,
@@ -526,24 +529,17 @@ const Calendar: React.FC = () => {
         </div>
       </div>
       <div className={`flex-grow-1 p-3 ${styles.content}`}>
+        <div className={`${styles['online-courses-container']} mb-2`} style={{ height: slotHeight }}>
+          {[...events, ...hoveredEvents].filter(event => event.day === "Online").map(event => (
+            <div key={event.id} className={`${styles['online-course-event']} mr-1.5 ml-1.5`} style={{ width: `${95 / 5}%`, backgroundColor: event.color || "#888888" }}>
+              <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
+              <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
+              Online<br />
+            </div>
+          ))}
+        </div>
         <table className={`${styles.table}`}>
           <thead>
-            <tr>
-              <td className={styles['time-column']}>Online</td>
-              {["1", "2", "3", "4", "5"].map(day =>
-                <td key={day} className={styles.td}>
-                  {[...events, ...hoveredEvents].filter(event => event.day == day && event.startTime == '00:00 AM' && event.endTime == '00:00 AM').map(event => {
-                      const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
-                      return (
-                        <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#888888"}}>
-                          <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
-                          <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
-                        </div>
-                      );
-                    })}
-                  </td>
-              )}
-            </tr>
             <tr>
               <th className={`text-center ${styles['time-th']}`}>Time</th>
               <th className={`text-center ${styles.th}`}>Monday</th>
