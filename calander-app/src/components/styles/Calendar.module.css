@@ -165,7 +165,7 @@
   border-radius: 6px;
   border: 1px solid #ccc;
   white-space: nowrap;
-  margin-left: 4%;
+  margin-left: 4.5%;
 }
 
 .online-courses-container::-webkit-scrollbar {
@@ -203,3 +203,47 @@
   max-width: 100px;
   height: auto;
 }
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 500px;
+  max-width: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modalContent {
+  margin-bottom: 20px;
+}
+
+.modalActions {
+  text-align: right;
+}
+
+.modalActions button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.modalActions button:hover {
+  background: #0056b3;
+}
+

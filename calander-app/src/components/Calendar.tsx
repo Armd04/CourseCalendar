@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import { useRouter } from 'next/navigation';
@@ -57,9 +58,13 @@ const Calendar: React.FC = () => {
   const [tutorialSections, setTutorialSections] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [hoveredEvents, setHoveredEvents] = useState<any[]>([]);
+  const [showConflictModal, setShowConflictModal] = useState<string>('');
   const timeSlotRef = useRef<HTMLTableCellElement>(null);
   const router = useRouter();
   const selectRef = useRef<any>(null);
+
+  const termSelectId = uuidv4();
+  const subjectSelectId = uuidv4();
 
   useEffect(() => {
     if (timeSlotRef.current) {
@@ -84,7 +89,6 @@ const Calendar: React.FC = () => {
           });
         } catch (error) {
           router.push('/login');
-          console.log('Not logged in');
         }
       }
       const getEvents = async () => {
@@ -163,7 +167,6 @@ const Calendar: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log(selectedTerm);
     if (selectedTerm) {
       setCourseCode('');
       setLectureSections([]);
@@ -202,20 +205,12 @@ const Calendar: React.FC = () => {
   };
 
   const calculatePosition = (startTime: string, endTime: string, timeSlots: string[]) => {
-    if (startTime != '00:00 AM' && endTime != '00:00 AM'){
-      const start = formatTime(startTime);
-      const end = formatTime(endTime);
-      return {
-        top: ((formatTime(startTime) - formatTime(timeSlots[0])) - Math.floor(formatTime(startTime) - formatTime(timeSlots[0]))) * slotHeight,
-        height: (end - start) * slotHeight
-      };
-    }
-    else {
-      return {
-        top: 0.025 * slotHeight,
-        height: 0.9 * slotHeight
-      };
-    }
+    const start = formatTime(startTime);
+    const end = formatTime(endTime);
+    return {
+      top: ((formatTime(startTime) - formatTime(timeSlots[0])) - Math.floor(formatTime(startTime) - formatTime(timeSlots[0]))) * slotHeight,
+      height: (end - start) * slotHeight
+    };
   };
 
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -249,7 +244,6 @@ const Calendar: React.FC = () => {
           setTutorialSections([]);
         }
       } catch (error) {
-        console.error('Failed to fetch course sections:', error);
         setLectureSections([]);
         setTutorialSections([]);
       }
@@ -350,11 +344,11 @@ const Calendar: React.FC = () => {
         const sameDayEvents = events.filter(event => event.day === newEvent.day);
         for (const event of sameDayEvents) {
           if (formatTime(newEvent.startTime) < formatTime(event.endTime) && formatTime(newEvent.endTime) > formatTime(event.startTime)) {
-            return false;
+            return event.title + " - " + event.courseComponent + " " + event.classSection;
           }
         }
       }
-      return true;
+      return '';
     }
 
     const checkRepeat = () => {
@@ -381,20 +375,27 @@ const Calendar: React.FC = () => {
       });
     }
 
-    const checkConflictResult = checkConflict();
     const checkRepeatResult = checkRepeat();
+    const checkConflictResult = checkConflict();
 
     if (!checkRepeatResult) {
       return;
     }
 
-    if (checkConflictResult) {
-      setEvents(prevEvents => [...prevEvents, ...newEvents]);
+    if (checkConflictResult === '') {
+      setEvents((prevEvents) => [...prevEvents, ...newEvents]);
       postData();
+    } else {
+      setShowConflictModal(checkConflictResult); // Show the conflict modal
     }
   };
 
   const handleCourseSectionHover = (course: any) => {
+    const isCourseInEvents = events.some(event => event.id === course.classNumber);
+    if (isCourseInEvents) {
+      return;
+    }
+
     const newEvents = course.scheduleData.map((schedule: any) => {
       const days = schedule.classMeetingDayPatternCode.split('');
       if (days.length != 0){
@@ -403,6 +404,7 @@ const Calendar: React.FC = () => {
           const startTime = new Date(schedule.classMeetingStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
           const endTime = new Date(schedule.classMeetingEndTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
           return {
+
             day: day === 'M' ? 'Monday' :
               day === 'T' ? 'Tuesday' :
                 day === 'W' ? 'Wednesday' :
@@ -480,6 +482,7 @@ const Calendar: React.FC = () => {
           />
         </div>
         <Select
+          id={termSelectId}
           ref={selectRef}
           options={terms}
           placeholder="Term..."
@@ -487,6 +490,7 @@ const Calendar: React.FC = () => {
           className={`w-100 mt-3 ${styles.select}`}
         />
         <Select
+          id={subjectSelectId}
           options={subjects}
           placeholder="Subject..."
           onChange={handleSubjectChange}
@@ -531,7 +535,7 @@ const Calendar: React.FC = () => {
       <div className={`flex-grow-1 p-3 ${styles.content}`}>
         <div className={`${styles['online-courses-container']} mb-2`} style={{ height: slotHeight }}>
           {[...events, ...hoveredEvents].filter(event => event.day === "Online").map(event => (
-            <div key={event.id} className={`${styles['online-course-event']} mr-1.5 ml-1.5`} style={{ width: `${95 / 5}%`, backgroundColor: event.color || "#888888" }}>
+            <div key={uuidv4()} className={`${styles['online-course-event']} mr-1.5 ml-1.5`} style={{ width: `${95 / 5}%`, backgroundColor: event.color || "#888888" }}>
               <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
               <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
               Online<br />
@@ -558,7 +562,7 @@ const Calendar: React.FC = () => {
                       {[...events, ...hoveredEvents].filter(event => event.day === day && index === firstIndex(event.startTime, timeSlots)).map(event => {
                         const { top, height } = calculatePosition(event.startTime, event.endTime, timeSlots);
                         return (
-                          <div key={event.id} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#888888"}}>
+                          <div key={uuidv4()} className={styles.event} style={{ top: `${top}px`, height: `${height}px`, backgroundColor: event.color || "#888888" }}>
                             <button className={styles['remove-button']} onClick={() => handleRemoveEvent(event.id)}>x</button>
                             <strong>{event.title} - {event.courseComponent} {event.classSection} - {event.enrolledStudents}/{event.maxEnrollmentCapacity}</strong><br />
                             {event.startTime} to {event.endTime}<br />
@@ -571,6 +575,21 @@ const Calendar: React.FC = () => {
               ))}
             </tbody>
         </table>
+      </div>
+      <div>
+        {showConflictModal !== '' && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalContent}>
+                <h2>Conflict</h2>
+                <p>The course selected has a time conflict with {showConflictModal}.</p>
+              </div>
+              <div className={styles.modalActions}>
+                <button onClick={() => setShowConflictModal('')}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
