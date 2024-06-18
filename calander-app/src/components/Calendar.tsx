@@ -56,6 +56,10 @@ const Calendar: React.FC = () => {
   const [slotHeight, setSlotHeight] = useState<number>(50);
   const [lectureSections, setLectureSections] = useState<any[]>([]);
   const [tutorialSections, setTutorialSections] = useState<any[]>([]);
+  const [courseSectionsContainerMessage, setCourseSectionsContainerMessage] = useState<string>('Enter a valid subject and code');
+  const [visibleLectureSections, setVisibleLectureSections] = useState<any[]>([]);
+  const [visibleTutorialSections, setVisibleTutorialSections] = useState<any[]>([]);
+  const [courseSectionsContainerLoading, setCourseSectionsContainerLoading] = useState<boolean>(false);
   const [events, setEvents] = useState<any[]>([]);
   const [hoveredEvents, setHoveredEvents] = useState<any[]>([]);
   const [showConflictModal, setShowConflictModal] = useState<string>('');
@@ -177,6 +181,22 @@ const Calendar: React.FC = () => {
     }
   }, [selectedTerm]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (courseSectionsContainerLoading) {
+      interval = setInterval(() => {
+        setCourseSectionsContainerMessage(prev => {
+          const newDots = prev === 'Loading...' ? 'Loading' : `${prev}.`;
+          return newDots;
+        });
+      }, 500);
+    } else {
+      setCourseSectionsContainerMessage('Enter a valid subject and code');
+    }
+    return () => clearInterval(interval);
+  }, [courseSectionsContainerLoading]);
+  
+
   const reloadEvents = () => {
     const getEvents = async () => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-schedule/?term=${selectedTerm}`, {
@@ -214,6 +234,10 @@ const Calendar: React.FC = () => {
   };
 
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCourseSectionsContainerMessage('Loading');
+    setVisibleLectureSections([]);
+    setVisibleTutorialSections([]);
+    setCourseSectionsContainerLoading(true);
     const inputCode = event.target.value;
     setCourseCode(inputCode);
     if (selectedSubject && inputCode) {
@@ -221,36 +245,40 @@ const Calendar: React.FC = () => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/class/?term=${selectedTerm}&subject=${selectedSubject}&catalog_number=${inputCode}`);
         if (response.data.length > 0) {
           const lectures = response.data.filter((course: any) => course.courseComponent === 'LEC');
-          for (let i = 0; i < lectures.length; ++i){
-            const EnrolledResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-enrolled/?term=${selectedTerm}&course_id=${lectures[i].courseId}&class_number=${lectures[i].classNumber}`);
-            lectures[i] = {
-              ...lectures[i],
-              ...EnrolledResponse.data
-            };
-          }
           const tutorials = response.data.filter((section: any) => section.courseComponent === 'TUT' || section.courseComponent === 'LAB');
-          for (let i = 0; i < tutorials.length; ++i){
-            const EnrolledResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-enrolled/?term=${selectedTerm}&course_id=${tutorials[i].courseId}&class_number=${tutorials[i].classNumber}`);
-            tutorials[i] = {
-              ...tutorials[i],
-              ...EnrolledResponse.data
-            };
-          }
-
+          
           setLectureSections(lectures);
           setTutorialSections(tutorials);
+  
+          lectures.forEach((section: any, index: number) => {
+            setTimeout(() => {
+              setVisibleLectureSections(prev => [...prev, section]);
+            }, index * 100);
+          });
+          
+          tutorials.forEach((section: any, index: number) => {
+            setTimeout(() => {
+              setVisibleTutorialSections(prev => [...prev, section]);
+            }, index * 100);
+          });
+  
+          setCourseSectionsContainerMessage('Enter a valid subject and code');
         } else {
           setLectureSections([]);
           setTutorialSections([]);
+          setCourseSectionsContainerMessage('Enter a valid subject and code');
         }
       } catch (error) {
         setLectureSections([]);
         setTutorialSections([]);
+        setCourseSectionsContainerMessage('Enter a valid subject and code');
       }
     } else {
       setLectureSections([]);
       setTutorialSections([]);
+      setCourseSectionsContainerMessage('Enter a valid subject and code');
     }
+    setCourseSectionsContainerLoading(false);
   };
 
   const handleInitialCourse = (course: any) => {
@@ -505,30 +533,39 @@ const Calendar: React.FC = () => {
         />
         <div className="d-flex flex-column flex-grow-1 w-100">
           <div className={`flex-grow-1 ${styles['course-sections-container']} mt-3`}>
-            {lectureSections.map((section) => (
-              <div
-                key={section.classNumber}
-                onClick={() => handleCourseSectionClick(section)}
-                onMouseEnter={() => handleCourseSectionHover(section)}
-                onMouseLeave={handleCourseSectionLeave}
-                className={`p-2 my-2 ${styles['course-section-item']}`}
-              >
-                {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
-              </div>
-            ))}
+            {lectureSections.length === 0 && tutorialSections.length === 0 ? (
+              <div className="p-2" style={{ fontSize: '1.1em' }}>{courseSectionsContainerMessage}</div>
+            ) : (
+              visibleLectureSections.map((section) => (
+                <div
+                  key={section.classNumber}
+                  onClick={() => handleCourseSectionClick(section)}
+                  onMouseEnter={() => handleCourseSectionHover(section)}
+                  onMouseLeave={handleCourseSectionLeave}
+                  className={`p-2 my-2 ${styles['course-section-item']}`}
+                >
+                  {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
+                </div>
+              ))
+            )}
           </div>
+
           <div className={`flex-grow-1 ${styles['course-sections-container']} mt-3`}>
-            {tutorialSections.map((section) => (
-              <div
-                key={section.classNumber}
-                onClick={() => handleCourseSectionClick(section)}
-                onMouseEnter={() => handleCourseSectionHover(section)}
-                onMouseLeave={handleCourseSectionLeave}
-                className={`p-2 my-2 ${styles['course-section-item']}`}
-              >
-                {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
-              </div>
-            ))}
+            {lectureSections.length === 0 && tutorialSections.length === 0 ? (
+              <div className="p-2" style={{ fontSize: '1.1em' }}>{courseSectionsContainerMessage}</div>
+            ) : (
+              visibleTutorialSections.map((section) => (
+                <div
+                  key={section.classNumber}
+                  onClick={() => handleCourseSectionClick(section)}
+                  onMouseEnter={() => handleCourseSectionHover(section)}
+                  onMouseLeave={handleCourseSectionLeave}
+                  className={`p-2 my-2 ${styles['course-section-item']}`}
+                >
+                  {selectedSubject.toUpperCase()} {courseCode} {section.courseComponent} {section.classSection}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -581,8 +618,7 @@ const Calendar: React.FC = () => {
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
               <div className={styles.modalContent}>
-                <h2>Conflict</h2>
-                <p>The course selected has a time conflict with {showConflictModal}.</p>
+                <p>The selected course has a time conflict with {showConflictModal}.</p>
               </div>
               <div className={styles.modalActions}>
                 <button onClick={() => setShowConflictModal('')}>Close</button>

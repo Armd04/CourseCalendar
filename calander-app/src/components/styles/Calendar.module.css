@@ -118,6 +118,17 @@
   z-index: 10;
 }
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .course-sections-container {
   background-color: #fff;
   color: #000;
@@ -129,6 +140,9 @@
   width: 100%;
   overflow-y: auto;
   height: 10px;
+  animation: slideIn 0.5s ease-in-out;
+  opacity: 0;
+  animation-fill-mode: forwards;
 }
 
 .course-sections-container::-webkit-scrollbar {
