@@ -96,7 +96,7 @@ const Login: React.FC = () => {
         </form>
         {message && <p className={`mt-3 text-center ${styles.message} ${error ? styles.errorMessage : ''}`}>{message}</p>}
         <p className={`mt-3 text-center ${styles.registerText}`}>
-          Don't have an account? <Link href="/register"><span className={styles.registerLink}>Register</span></Link>
+          Don&apos;t have an account? <Link href="/register"><span className={styles.registerLink}>Register</span></Link>
         </p>
       </div>
     </div>
