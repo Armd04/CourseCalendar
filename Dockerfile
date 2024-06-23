@@ -22,4 +22,4 @@ EXPOSE 3000
 ENV NODE_ENV production
 
 # Command to run the Next.js production server
-CMD ["npm", "run", "dev", "--prefix", "calander-app"]
+CMD ["npm", "run", "start", "--prefix", "calander-app"]
