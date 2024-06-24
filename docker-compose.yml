@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   frontend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - .:/app
     ports:
@@ -11,4 +13,17 @@ services:
       - NODE_VERSION=18.20.3
       - YARN_VERSION=1.22.19
       - NODE_ENV=production
-    command: npm run start 
+    command: npm run start
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=CourseCalander.settings
+    command: gunicorn --bind localhost:8000 CourseCalander.wsgi:application
