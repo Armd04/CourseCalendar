@@ -27,8 +27,8 @@ COPY . /app/
 # Build the Next.js application
 RUN npm run build --prefix calander-app
 
-RUN python manage.py makemigrations
-RUN python manage.py migrate
+# RUN python manage.py makemigrations
+# RUN python manage.py migrate
 
 
 
