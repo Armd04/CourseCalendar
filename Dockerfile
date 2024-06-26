@@ -42,4 +42,4 @@ EXPOSE 8000
 EXPOSE 3000
 
 # Run the application
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:8000 CourseCalander.wsgi:application & npm run start --prefix calander-app -- -p 3000"]
+CMD ["sh", "-c", "gunicorn CourseCalander.wsgi:application & npm run start --prefix calander-app -- -p 3000"]
