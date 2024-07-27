@@ -1,7 +1,9 @@
 # CourseCalander
 
-python3 manage.py runserver
+cd CourseCalendar
 
-cd ./calander-app
+python manage.py runserver
+
+cd ../calander-app
 
 npm run dev
