@@ -28,7 +28,7 @@ load_dotenv()
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -101,10 +101,10 @@ SIMPLE_JWT = {
 }
 
 
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your frontend URL here
-]
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",  # Add your frontend URL here
+# ]
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'access-control-allow-origin',  # This should be controlled by the server
     'access-control-allow-headers', # This should be controlled by the server
