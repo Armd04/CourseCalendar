@@ -5,7 +5,7 @@ cd /app/backend
 gunicorn CourseCalander.wsgi:application --bind 0.0.0.0:8000 &
 
 # Start Next.js server in the background
-npm run start --prefix /app/frontend &
+npm run start --prefix /app/frontend -- -p 3000 &
 
 # Start Nginx
 nginx -g 'daemon off;'
