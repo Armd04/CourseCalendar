@@ -47,7 +47,7 @@ const firstIndex = (startTime: string, timeSlots: string[]) => {
 }
 
 const Calendar: React.FC = () => {
-  const defaultTerm = { id: '1253', label: 'Spring 2025', value: '1253' };
+  const defaultTerm = { id: '1251', label: 'Winter 2025', value: '1255' };
   const [terms, setTerms] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
   const [selectedTerm, setSelectedTerm] = useState<string>();
